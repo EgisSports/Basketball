@@ -1,262 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Basketball Leaderboard</title>
-<style>
-  /* === GLOBAL STYLING === */
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: radial-gradient(circle at top left, #0E4C7B, #0F1623 60%);
-    color: #fff;
-    margin: 0;
-    padding: 30px;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🏀 Elite Shot Leaderboard</title>
+  <style>
+    body {
+      font-family: "Orbitron", sans-serif;
+      background: radial-gradient(circle at center, #0d1b2a 0%, #000 100%);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-  h1 {
-    text-align: center;
-    font-size: 2.4em;
-    margin-bottom: 20px;
-    color: #99F200;
-    text-shadow: 0 0 10px rgba(153,242,0,0.8), 0 0 20px rgba(14,76,123,0.8);
-  }
+    h1 {
+      margin-top: 40px;
+      font-size: 2.8rem;
+      letter-spacing: 2px;
+      text-shadow: 0 0 20px #00ffcc, 0 0 40px #00ffcc;
+    }
 
-  /* === CONTAINER === */
-  .dashboard {
-    background: rgba(20, 30, 50, 0.85);
-    border-radius: 16px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    padding: 25px;
-    width: 95%;
-    max-width: 800px;
-    backdrop-filter: blur(6px);
-  }
+    .scoreboard {
+      width: 90%;
+      max-width: 700px;
+      margin: 30px auto;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 0 25px rgba(0, 255, 204, 0.2);
+      backdrop-filter: blur(10px);
+    }
 
-  /* === TABLE === */
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    border-radius: 10px;
-    overflow: hidden;
-  }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
 
-  th, td {
-    text-align: center;
-    padding: 12px;
-  }
+    th, td {
+      padding: 12px;
+      text-align: center;
+      font-size: 1.1rem;
+    }
 
-  th {
-    background: #0E4C7B;
-    color: #fff;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
+    th {
+      border-bottom: 2px solid #00ffcc;
+      color: #00ffcc;
+      text-shadow: 0 0 10px #00ffcc;
+    }
 
-  tr {
-    transition: all 0.2s ease-in-out;
-  }
+    tr {
+      transition: background 0.3s, transform 0.2s;
+    }
 
-  tr:hover {
-    transform: scale(1.01);
-  }
+    tr:hover {
+      transform: scale(1.02);
+      background: rgba(255, 255, 255, 0.05);
+    }
 
-  /* === GRADIENT BASED ON PERFORMANCE === */
-  .gradient-cell {
-    font-weight: bold;
-    color: #fff;
-    text-shadow: 0 0 4px rgba(0,0,0,0.6);
-  }
+    .gradient-row {
+      background: linear-gradient(to right, #008000, #ffff00, #ff0000);
+      height: 10px;
+    }
 
-  /* === FORM INPUTS === */
-  form {
-    margin-top: 20px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-  }
+    input, button {
+      margin: 10px;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+    }
 
-  input[type="text"], input[type="number"] {
-    padding: 10px;
-    border-radius: 8px;
-    border: none;
-    background: #1a2436;
-    color: #fff;
-    width: 120px;
-    text-align: center;
-  }
+    input {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      width: 120px;
+      text-align: center;
+    }
 
-  button {
-    background: #0E4C7B;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 18px;
-    color: #fff;
-    cursor: pointer;
-    font-size: 1em;
-    transition: 0.2s ease-in-out;
-    box-shadow: 0 0 8px rgba(14,76,123,0.6);
-  }
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
 
-  button:hover {
-    background: #99F200;
-    color: #0E4C7B;
-    box-shadow: 0 0 15px rgba(153,242,0,0.8);
-    transform: translateY(-2px);
-  }
+    button {
+      cursor: pointer;
+      background: linear-gradient(90deg, #00ffcc, #00bfff);
+      color: #000;
+      font-weight: bold;
+      box-shadow: 0 0 15px #00ffcc;
+      transition: 0.3s;
+    }
 
-  /* === ACTION BUTTONS === */
-  .controls {
-    margin-top: 20px;
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    flex-wrap: wrap;
-  }
+    button:hover {
+      background: linear-gradient(90deg, #00bfff, #00ffcc);
+      box-shadow: 0 0 25px #00ffcc;
+    }
 
-  .controls button {
-    min-width: 150px;
-  }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
 
-  @media (max-width: 600px) {
-    table th, table td { font-size: 0.9em; }
-    button { font-size: 0.9em; padding: 8px 12px; }
-  }
-</style>
+    .footer {
+      margin-top: auto;
+      padding: 15px;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.4);
+    }
+  </style>
 </head>
 <body>
+  <h1>🏀 Elite Shot Leaderboard</h1>
 
-<h1>🏀 Basketball Leaderboard</h1>
+  <div class="scoreboard">
+    <div class="controls">
+      <input id="playerName" placeholder="Player Name" />
+      <input id="makes" type="number" placeholder="Makes" />
+      <input id="attempts" type="number" placeholder="Attempts" />
+      <button onclick="addStats()">Add Stats</button>
+      <button onclick="resetAll()">Reset All</button>
+      <button onclick="exportCSV()">Export CSV</button>
+      <input type="file" id="importFile" accept=".csv" style="display:none" onchange="importCSV(event)" />
+      <button onclick="document.getElementById('importFile').click()">Import CSV</button>
+    </div>
 
-<div class="dashboard">
-  <table id="leaderboard">
-    <thead>
-      <tr>
-        <th>Player</th>
-        <th>Makes</th>
-        <th>Attempts</th>
-        <th>Percentage</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <form id="addPlayerForm">
-    <input type="text" id="playerName" placeholder="Player name" required />
-    <input type="number" id="makes" placeholder="Makes" min="0" required />
-    <input type="number" id="attempts" placeholder="Attempts" min="1" required />
-    <button type="submit">Add / Update</button>
-  </form>
-
-  <div class="controls">
-    <button id="resetAll">Reset All Stats</button>
-    <button id="exportCSV">Export CSV</button>
-    <input type="file" id="importCSV" accept=".csv" style="display:none">
-    <button id="importBtn">Import CSV</button>
+    <table id="leaderboard">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Player</th>
+          <th>Makes</th>
+          <th>Attempts</th>
+          <th>%</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
-</div>
 
-<script>
-  const form = document.getElementById("addPlayerForm");
-  const tableBody = document.querySelector("#leaderboard tbody");
-  const resetButton = document.getElementById("resetAll");
-  const exportButton = document.getElementById("exportCSV");
-  const importButton = document.getElementById("importBtn");
-  const importInput = document.getElementById("importCSV");
+  <div class="footer">💾 Data stored locally — export for backup!</div>
 
-  let stats = JSON.parse(localStorage.getItem("basketballStats")) || {};
+  <script>
+    let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
 
-  function getColorForPercentage(pct) {
-    // Green to red gradient based on percentage
-    const r = Math.round(255 - (pct * 2.55));
-    const g = Math.round(pct * 2.55);
-    return `rgb(${r}, ${g}, 60)`; // keep a bit of warmth
-  }
+    function updateLeaderboard() {
+      const tbody = document.querySelector("#leaderboard tbody");
+      tbody.innerHTML = "";
 
-  function updateTable() {
-    tableBody.innerHTML = "";
-    const sorted = Object.entries(stats).sort((a,b) => (b[1].makes/b[1].attempts) - (a[1].makes/a[1].attempts));
-    sorted.forEach(([player, {makes, attempts}]) => {
-      const pct = (makes / attempts) * 100;
-      const row = document.createElement('tr');
-      const color = getColorForPercentage(pct);
-      row.innerHTML = `
-        <td>${player}</td>
-        <td>${makes}</td>
-        <td>${attempts}</td>
-        <td class="gradient-cell" style="background:${color};">${pct.toFixed(1)}%</td>
-      `;
-      tableBody.appendChild(row);
-    });
-  }
+      leaderboard.sort((a, b) => b.makes / b.attempts - a.makes / a.attempts);
 
-  form.addEventListener("submit", e => {
-    e.preventDefault();
-    const player = document.getElementById("playerName").value.trim();
-    const makes = parseInt(document.getElementById("makes").value);
-    const attempts = parseInt(document.getElementById("attempts").value);
-    if (!player || attempts < makes) return alert("Invalid input");
-    if (!stats[player]) stats[player] = {makes, attempts};
-    else { stats[player].makes += makes; stats[player].attempts += attempts; }
-    localStorage.setItem("basketballStats", JSON.stringify(stats));
-    form.reset();
-    updateTable();
-  });
+      leaderboard.forEach((p, i) => {
+        const row = document.createElement("tr");
 
-  resetButton.addEventListener("click", () => {
-    if(confirm("Reset all stats?")) {
-      stats = {};
-      localStorage.removeItem("basketballStats");
-      updateTable();
-    }
-  });
+        // Green-to-red gradient based on shooting percentage
+        const pct = p.attempts > 0 ? (p.makes / p.attempts) * 100 : 0;
+        const hue = (pct * 1.2).toFixed(0); // map 0–100% to green->red hue range
+        row.style.background = `hsl(${hue}, 70%, 30%)`;
 
-  /* === EXPORT CSV === */
-  exportButton.addEventListener("click", () => {
-    let csv = "Player,Makes,Attempts,Percentage\n";
-    Object.entries(stats).forEach(([player, {makes, attempts}]) => {
-      const pct = ((makes/attempts)*100).toFixed(1);
-      csv += `${player},${makes},${attempts},${pct}%\n`;
-    });
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "basketball_leaderboard.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-
-  /* === IMPORT CSV === */
-  importButton.addEventListener("click", () => importInput.click());
-
-  importInput.addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(ev) {
-      const lines = ev.target.result.split("\n").slice(1); // skip header
-      lines.forEach(line => {
-        const [player, makes, attempts] = line.split(",");
-        if (!player) return;
-        const m = parseInt(makes);
-        const a = parseInt(attempts);
-        if (!stats[player]) stats[player] = {makes: m, attempts: a};
-        else { stats[player].makes += m; stats[player].attempts += a; }
+        row.innerHTML = `
+          <td>${i + 1}</td>
+          <td>${p.name}</td>
+          <td>${p.makes}</td>
+          <td>${p.attempts}</td>
+          <td>${pct.toFixed(1)}%</td>
+        `;
+        tbody.appendChild(row);
       });
-      localStorage.setItem("basketballStats", JSON.stringify(stats));
-      updateTable();
-      alert("CSV data imported successfully!");
-    };
-    reader.readAsText(file);
-  });
 
-  updateTable();
-</script>
+      localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+    }
+
+    function addStats() {
+      const name = document.getElementById("playerName").value.trim();
+      const makes = parseInt(document.getElementById("makes").value);
+      const attempts = parseInt(document.getElementById("attempts").value);
+
+      if (!name || isNaN(makes) || isNaN(attempts)) return alert("Enter valid data!");
+
+      const existing = leaderboard.find(p => p.name.toLowerCase() === name.toLowerCase());
+      if (existing) {
+        existing.makes += makes;
+        existing.attempts += attempts;
+      } else {
+        leaderboard.push({ name, makes, attempts });
+      }
+
+      updateLeaderboard();
+      document.getElementById("playerName").value = "";
+      document.getElementById("makes").value = "";
+      document.getElementById("attempts").value = "";
+    }
+
+    function resetAll() {
+      if (confirm("Are you sure you want to reset all stats?")) {
+        leaderboard = [];
+        updateLeaderboard();
+      }
+    }
+
+    function exportCSV() {
+      let csv = "Player,Makes,Attempts\n";
+      leaderboard.forEach(p => {
+        csv += `${p.name},${p.makes},${p.attempts}\n`;
+      });
+
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "leaderboard.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importCSV(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        const lines = e.target.result.split("\n").slice(1);
+        lines.forEach(line => {
+          const [name, makes, attempts] = line.split(",");
+          if (name && !isNaN(makes) && !isNaN(attempts)) {
+            const existing = leaderboard.find(p => p.name.toLowerCase() === name.toLowerCase());
+            if (existing) {
+              existing.makes += parseInt(makes);
+              existing.attempts += parseInt(attempts);
+            } else {
+              leaderboard.push({ name, makes: parseInt(makes), attempts: parseInt(attempts) });
+            }
+          }
+        });
+        updateLeaderboard();
+      };
+      reader.readAsText(file);
+    }
+
+    updateLeaderboard();
+  </script>
 </body>
 </html>
