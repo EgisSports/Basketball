@@ -5,102 +5,127 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Basketball Leaderboard</title>
 <style>
+  /* === GLOBAL STYLING === */
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 40px;
-    background-color: #0F1623; /* CMYK 94/77/54/66 */
+    background: radial-gradient(circle at top left, #0E4C7B, #0F1623 60%);
     color: #fff;
+    margin: 0;
+    padding: 30px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   h1 {
     text-align: center;
-    margin-bottom: 30px;
-    font-size: 2em;
-    color: #0E4C7B; /* CMYK 94/56/35/12 */
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    font-size: 2.4em;
+    margin-bottom: 20px;
+    color: #99F200;
+    text-shadow: 0 0 10px rgba(153,242,0,0.8), 0 0 20px rgba(14,76,123,0.8);
   }
 
+  /* === CONTAINER === */
+  .dashboard {
+    background: rgba(20, 30, 50, 0.85);
+    border-radius: 16px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    padding: 25px;
+    width: 95%;
+    max-width: 800px;
+    backdrop-filter: blur(6px);
+  }
+
+  /* === TABLE === */
   table {
     width: 100%;
     border-collapse: collapse;
-    background: #111828; /* slightly lighter than background for contrast */
-    border-radius: 12px;
+    border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
   }
 
   th, td {
-    padding: 14px;
     text-align: center;
-    border-bottom: 1px solid #333;
+    padding: 12px;
   }
 
   th {
-    background: #0E4C7B; /* dark blue theme */
+    background: #0E4C7B;
     color: #fff;
-    font-weight: 600;
-    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  tr {
+    transition: all 0.2s ease-in-out;
   }
 
   tr:hover {
-    background: rgba(153,242,0,0.2); /* lime highlight on hover */
+    transform: scale(1.01);
   }
 
-  .high-percentage {
-    background-color: rgba(153,242,0,0.6); /* lime green highlight */
+  /* === GRADIENT BASED ON PERFORMANCE === */
+  .gradient-cell {
     font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 4px rgba(0,0,0,0.6);
   }
 
-  .medium-percentage {
-    background-color: rgba(255, 235, 59, 0.4); /* medium yellowish */
-  }
-
-  .low-percentage {
-    background-color: rgba(255, 0, 0, 0.2); /* light red */
-  }
-
+  /* === FORM INPUTS === */
   form {
+    margin-top: 20px;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 10px;
-    margin-top: 25px;
   }
 
   input[type="text"], input[type="number"] {
     padding: 10px;
     border-radius: 8px;
-    border: 1px solid #555;
+    border: none;
+    background: #1a2436;
+    color: #fff;
     width: 120px;
     text-align: center;
-    font-size: 1em;
-    background: #1C2433;
-    color: #fff;
   }
 
   button {
-    padding: 10px 18px;
-    background: #0E4C7B; /* dark blue */
-    color: #fff;
+    background: #0E4C7B;
     border: none;
     border-radius: 8px;
+    padding: 10px 18px;
+    color: #fff;
     cursor: pointer;
     font-size: 1em;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-    transition: all 0.2s ease;
+    transition: 0.2s ease-in-out;
+    box-shadow: 0 0 8px rgba(14,76,123,0.6);
   }
 
   button:hover {
-    background: #99F200; /* lime green on hover */
+    background: #99F200;
     color: #0E4C7B;
+    box-shadow: 0 0 15px rgba(153,242,0,0.8);
     transform: translateY(-2px);
   }
 
-  #resetAll {
-    margin-top: 15px;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
+  /* === ACTION BUTTONS === */
+  .controls {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  .controls button {
+    min-width: 150px;
+  }
+
+  @media (max-width: 600px) {
+    table th, table td { font-size: 0.9em; }
+    button { font-size: 0.9em; padding: 8px 12px; }
   }
 </style>
 </head>
@@ -108,43 +133,64 @@
 
 <h1>🏀 Basketball Leaderboard</h1>
 
-<table id="leaderboard">
-  <thead>
-    <tr>
-      <th>Player</th>
-      <th>Makes</th>
-      <th>Attempts</th>
-      <th>Percentage</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+<div class="dashboard">
+  <table id="leaderboard">
+    <thead>
+      <tr>
+        <th>Player</th>
+        <th>Makes</th>
+        <th>Attempts</th>
+        <th>Percentage</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-<form id="addPlayerForm">
-  <input type="text" id="playerName" placeholder="Player name" required />
-  <input type="number" id="makes" placeholder="Makes" min="0" required />
-  <input type="number" id="attempts" placeholder="Attempts" min="1" required />
-  <button type="submit">Add / Update Stats</button>
-</form>
+  <form id="addPlayerForm">
+    <input type="text" id="playerName" placeholder="Player name" required />
+    <input type="number" id="makes" placeholder="Makes" min="0" required />
+    <input type="number" id="attempts" placeholder="Attempts" min="1" required />
+    <button type="submit">Add / Update</button>
+  </form>
 
-<button id="resetAll">Reset All Stats</button>
+  <div class="controls">
+    <button id="resetAll">Reset All Stats</button>
+    <button id="exportCSV">Export CSV</button>
+    <input type="file" id="importCSV" accept=".csv" style="display:none">
+    <button id="importBtn">Import CSV</button>
+  </div>
+</div>
 
 <script>
   const form = document.getElementById("addPlayerForm");
   const tableBody = document.querySelector("#leaderboard tbody");
   const resetButton = document.getElementById("resetAll");
+  const exportButton = document.getElementById("exportCSV");
+  const importButton = document.getElementById("importBtn");
+  const importInput = document.getElementById("importCSV");
 
   let stats = JSON.parse(localStorage.getItem("basketballStats")) || {};
+
+  function getColorForPercentage(pct) {
+    // Green to red gradient based on percentage
+    const r = Math.round(255 - (pct * 2.55));
+    const g = Math.round(pct * 2.55);
+    return `rgb(${r}, ${g}, 60)`; // keep a bit of warmth
+  }
 
   function updateTable() {
     tableBody.innerHTML = "";
     const sorted = Object.entries(stats).sort((a,b) => (b[1].makes/b[1].attempts) - (a[1].makes/a[1].attempts));
     sorted.forEach(([player, {makes, attempts}]) => {
       const pct = (makes / attempts) * 100;
-      let className = pct >= 70 ? 'high-percentage' : pct >= 50 ? 'medium-percentage' : 'low-percentage';
       const row = document.createElement('tr');
-      row.className = className;
-      row.innerHTML = `<td>${player}</td><td>${makes}</td><td>${attempts}</td><td>${pct.toFixed(1)}%</td>`;
+      const color = getColorForPercentage(pct);
+      row.innerHTML = `
+        <td>${player}</td>
+        <td>${makes}</td>
+        <td>${attempts}</td>
+        <td class="gradient-cell" style="background:${color};">${pct.toFixed(1)}%</td>
+      `;
       tableBody.appendChild(row);
     });
   }
@@ -163,15 +209,54 @@
   });
 
   resetButton.addEventListener("click", () => {
-    if(confirm("Are you sure you want to reset all stats?")) {
+    if(confirm("Reset all stats?")) {
       stats = {};
       localStorage.removeItem("basketballStats");
       updateTable();
     }
   });
 
+  /* === EXPORT CSV === */
+  exportButton.addEventListener("click", () => {
+    let csv = "Player,Makes,Attempts,Percentage\n";
+    Object.entries(stats).forEach(([player, {makes, attempts}]) => {
+      const pct = ((makes/attempts)*100).toFixed(1);
+      csv += `${player},${makes},${attempts},${pct}%\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "basketball_leaderboard.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  /* === IMPORT CSV === */
+  importButton.addEventListener("click", () => importInput.click());
+
+  importInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      const lines = ev.target.result.split("\n").slice(1); // skip header
+      lines.forEach(line => {
+        const [player, makes, attempts] = line.split(",");
+        if (!player) return;
+        const m = parseInt(makes);
+        const a = parseInt(attempts);
+        if (!stats[player]) stats[player] = {makes: m, attempts: a};
+        else { stats[player].makes += m; stats[player].attempts += a; }
+      });
+      localStorage.setItem("basketballStats", JSON.stringify(stats));
+      updateTable();
+      alert("CSV data imported successfully!");
+    };
+    reader.readAsText(file);
+  });
+
   updateTable();
 </script>
-
 </body>
 </html>
