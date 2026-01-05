@@ -1,250 +1,291 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🏀 Elite Shot Leaderboard</title>
-  <style>
-    body {
-      font-family: "Orbitron", sans-serif;
-      background: radial-gradient(circle at center, #0d1b2a 0%, #000 100%);
-      color: #fff;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Elite Shot Leaderboard</title>
 
-    h1 {
-      margin-top: 40px;
-      font-size: 2.8rem;
-      letter-spacing: 2px;
-      text-shadow: 0 0 20px #00ffcc, 0 0 40px #00ffcc;
-    }
+<style>
+  body {
+    font-family: "Orbitron", sans-serif;
+    background: radial-gradient(circle at center, #0b1020 0%, #000 100%);
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
 
-    .scoreboard {
-      width: 90%;
-      max-width: 700px;
-      margin: 30px auto;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 0 25px rgba(0, 255, 204, 0.2);
-      backdrop-filter: blur(10px);
-    }
+  h1 {
+    margin: 30px 0 10px;
+    font-size: 2.6rem;
+    letter-spacing: 2px;
+    text-shadow: 0 0 25px #00ffcc;
+  }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
 
-    th, td {
-      padding: 12px;
-      text-align: center;
-      font-size: 1.1rem;
-    }
+  .tab {
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    background: rgba(255,255,255,0.1);
+    box-shadow: 0 0 10px rgba(0,255,204,0.3);
+    transition: 0.3s;
+  }
 
-    th {
-      border-bottom: 2px solid #00ffcc;
-      color: #00ffcc;
-      text-shadow: 0 0 10px #00ffcc;
-    }
+  .tab.active {
+    background: linear-gradient(90deg, #00ffcc, #00bfff);
+    color: #000;
+    box-shadow: 0 0 20px #00ffcc;
+  }
 
-    tr {
-      transition: background 0.3s, transform 0.2s;
-    }
+  .board {
+    width: 90%;
+    max-width: 750px;
+    margin: auto;
+    background: rgba(255,255,255,0.05);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 0 25px rgba(0,255,204,0.25);
+    backdrop-filter: blur(10px);
+  }
 
-    tr:hover {
-      transform: scale(1.02);
-      background: rgba(255, 255, 255, 0.05);
-    }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
 
-    .gradient-row {
-      background: linear-gradient(to right, #008000, #ffff00, #ff0000);
-      height: 10px;
-    }
+  th, td {
+    padding: 12px;
+    text-align: center;
+  }
 
-    input, button {
-      margin: 10px;
-      padding: 10px 15px;
-      border-radius: 8px;
-      border: none;
-      font-size: 1rem;
-    }
+  th {
+    color: #00ffcc;
+    border-bottom: 2px solid #00ffcc;
+    text-shadow: 0 0 10px #00ffcc;
+  }
 
-    input {
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      width: 120px;
-      text-align: center;
-    }
+  tr {
+    transition: transform 0.2s;
+  }
 
-    input::placeholder {
-      color: rgba(255, 255, 255, 0.5);
-    }
+  tr:hover {
+    transform: scale(1.02);
+  }
 
-    button {
-      cursor: pointer;
-      background: linear-gradient(90deg, #00ffcc, #00bfff);
-      color: #000;
-      font-weight: bold;
-      box-shadow: 0 0 15px #00ffcc;
-      transition: 0.3s;
-    }
+  .controls {
+    margin-bottom: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
 
-    button:hover {
-      background: linear-gradient(90deg, #00bfff, #00ffcc);
-      box-shadow: 0 0 25px #00ffcc;
-    }
+  input, button {
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+  }
 
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-    }
+  input {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    width: 120px;
+    text-align: center;
+  }
 
-    .footer {
-      margin-top: auto;
-      padding: 15px;
-      font-size: 0.9rem;
-      color: rgba(255, 255, 255, 0.4);
-    }
-  </style>
+  button {
+    cursor: pointer;
+    background: linear-gradient(90deg, #00ffcc, #00bfff);
+    color: #000;
+    font-weight: bold;
+    box-shadow: 0 0 15px #00ffcc;
+    transition: 0.3s;
+  }
+
+  button:hover {
+    box-shadow: 0 0 25px #00ffcc;
+  }
+
+  .locked {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    margin-bottom: 10px;
+  }
+
+  footer {
+    margin: 20px 0;
+    opacity: 0.4;
+    font-size: 0.85rem;
+  }
+</style>
 </head>
+
 <body>
-  <h1>🏀 Elite Shot Leaderboard</h1>
 
-  <div class="scoreboard">
-    <div class="controls">
-      <input id="playerName" placeholder="Player Name" />
-      <input id="makes" type="number" placeholder="Makes" />
-      <input id="attempts" type="number" placeholder="Attempts" />
-      <button onclick="addStats()">Add Stats</button>
-      <button onclick="resetAll()">Reset All</button>
-      <button onclick="exportCSV()">Export CSV</button>
-      <input type="file" id="importFile" accept=".csv" style="display:none" onchange="importCSV(event)" />
-      <button onclick="document.getElementById('importFile').click()">Import CSV</button>
-    </div>
+<h1>🏀 Elite Shot Leaderboard</h1>
 
-    <table id="leaderboard">
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Player</th>
-          <th>Makes</th>
-          <th>Attempts</th>
-          <th>%</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+<div class="tabs">
+  <div class="tab active" onclick="switchYear(2025)">2025</div>
+  <div class="tab" onclick="switchYear(2026)">2026</div>
+</div>
 
-  <div class="footer">💾 Data stored locally — export for backup!</div>
+<div class="board">
 
-  <script>
-    let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+  <div id="controls" class="controls"></div>
 
-    function updateLeaderboard() {
-      const tbody = document.querySelector("#leaderboard tbody");
-      tbody.innerHTML = "";
+  <table>
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Player</th>
+        <th>Makes</th>
+        <th>Attempts</th>
+        <th>%</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
 
-      leaderboard.sort((a, b) => b.makes / b.attempts - a.makes / a.attempts);
+</div>
 
-      leaderboard.forEach((p, i) => {
-        const row = document.createElement("tr");
+<footer>Data stored locally • Export CSV for backup</footer>
 
-        // Green-to-red gradient based on shooting percentage
-        const pct = p.attempts > 0 ? (p.makes / p.attempts) * 100 : 0;
-        const hue = (pct * 1.2).toFixed(0); // map 0–100% to green->red hue range
-        row.style.background = `hsl(${hue}, 70%, 30%)`;
+<script>
+/* =====================
+   FROZEN 2025 DATA
+   ===================== */
+const leaderboard2025 = [
+  // 🔒 Replace with final 2025 snapshot
+  { name: "Player A", makes: 48, attempts: 75 },
+  { name: "Player B", makes: 41, attempts: 70 },
+  { name: "Player C", makes: 30, attempts: 65 }
+];
 
-        row.innerHTML = `
-          <td>${i + 1}</td>
-          <td>${p.name}</td>
-          <td>${p.makes}</td>
-          <td>${p.attempts}</td>
-          <td>${pct.toFixed(1)}%</td>
-        `;
-        tbody.appendChild(row);
-      });
+/* =====================
+   2026 LIVE DATA
+   ===================== */
+let leaderboard2026 = JSON.parse(localStorage.getItem("leaderboard_2026")) || [];
 
-      localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
-    }
+let currentYear = 2025;
 
-    function addStats() {
-      const name = document.getElementById("playerName").value.trim();
-      const makes = parseInt(document.getElementById("makes").value);
-      const attempts = parseInt(document.getElementById("attempts").value);
+function switchYear(year) {
+  currentYear = year;
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.querySelector(`.tab:nth-child(${year === 2025 ? 1 : 2})`).classList.add("active");
+  render();
+}
 
-      if (!name || isNaN(makes) || isNaN(attempts)) return alert("Enter valid data!");
+function render() {
+  const tbody = document.getElementById("tbody");
+  const controls = document.getElementById("controls");
+  tbody.innerHTML = "";
+  controls.innerHTML = "";
 
-      const existing = leaderboard.find(p => p.name.toLowerCase() === name.toLowerCase());
-      if (existing) {
-        existing.makes += makes;
-        existing.attempts += attempts;
-      } else {
-        leaderboard.push({ name, makes, attempts });
+  const data = currentYear === 2025 ? leaderboard2025 : leaderboard2026;
+
+  if (currentYear === 2026) {
+    controls.innerHTML = `
+      <input id="name" placeholder="Player">
+      <input id="makes" type="number" placeholder="Makes">
+      <input id="attempts" type="number" placeholder="Attempts">
+      <button onclick="addStats()">Add</button>
+      <button onclick="exportCSV()">Export</button>
+      <input type="file" id="file" accept=".csv" hidden onchange="importCSV(event)">
+      <button onclick="document.getElementById('file').click()">Import</button>
+      <button onclick="reset2026()">Reset</button>
+    `;
+  } else {
+    controls.innerHTML = `<div class="locked">🔒 2025 Leaderboard is permanently sealed</div>`;
+  }
+
+  [...data].sort((a,b) => (b.makes/b.attempts) - (a.makes/a.attempts))
+    .forEach((p,i) => {
+      const pct = (p.makes / p.attempts) * 100;
+      const hue = Math.min(120, Math.max(0, pct * 1.2));
+      const row = document.createElement("tr");
+      row.style.background = `hsl(${hue},70%,30%)`;
+      row.innerHTML = `
+        <td>${i+1}</td>
+        <td>${p.name}</td>
+        <td>${p.makes}</td>
+        <td>${p.attempts}</td>
+        <td>${pct.toFixed(1)}%</td>
+      `;
+      tbody.appendChild(row);
+    });
+}
+
+function addStats() {
+  const name = document.getElementById("name").value.trim();
+  const makes = +document.getElementById("makes").value;
+  const attempts = +document.getElementById("attempts").value;
+  if (!name || makes < 0 || attempts <= 0) return;
+
+  const p = leaderboard2026.find(x => x.name.toLowerCase() === name.toLowerCase());
+  if (p) {
+    p.makes += makes;
+    p.attempts += attempts;
+  } else {
+    leaderboard2026.push({ name, makes, attempts });
+  }
+
+  localStorage.setItem("leaderboard_2026", JSON.stringify(leaderboard2026));
+  render();
+}
+
+function reset2026() {
+  if (confirm("Reset ALL 2026 stats?")) {
+    leaderboard2026 = [];
+    localStorage.removeItem("leaderboard_2026");
+    render();
+  }
+}
+
+function exportCSV() {
+  let csv = "Player,Makes,Attempts\n";
+  leaderboard2026.forEach(p => csv += `${p.name},${p.makes},${p.attempts}\n`);
+  const blob = new Blob([csv], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "leaderboard_2026.csv";
+  a.click();
+}
+
+function importCSV(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    reader.result.split("\n").slice(1).forEach(l => {
+      const [n,m,a] = l.split(",");
+      if (n && m && a) {
+        const p = leaderboard2026.find(x => x.name.toLowerCase() === n.toLowerCase());
+        if (p) {
+          p.makes += +m;
+          p.attempts += +a;
+        } else {
+          leaderboard2026.push({ name:n, makes:+m, attempts:+a });
+        }
       }
+    });
+    localStorage.setItem("leaderboard_2026", JSON.stringify(leaderboard2026));
+    render();
+  };
+  reader.readAsText(file);
+}
 
-      updateLeaderboard();
-      document.getElementById("playerName").value = "";
-      document.getElementById("makes").value = "";
-      document.getElementById("attempts").value = "";
-    }
+render();
+</script>
 
-    function resetAll() {
-      if (confirm("Are you sure you want to reset all stats?")) {
-        leaderboard = [];
-        updateLeaderboard();
-      }
-    }
-
-    function exportCSV() {
-      let csv = "Player,Makes,Attempts\n";
-      leaderboard.forEach(p => {
-        csv += `${p.name},${p.makes},${p.attempts}\n`;
-      });
-
-      const blob = new Blob([csv], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "leaderboard.csv";
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    function importCSV(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = e => {
-        const lines = e.target.result.split("\n").slice(1);
-        lines.forEach(line => {
-          const [name, makes, attempts] = line.split(",");
-          if (name && !isNaN(makes) && !isNaN(attempts)) {
-            const existing = leaderboard.find(p => p.name.toLowerCase() === name.toLowerCase());
-            if (existing) {
-              existing.makes += parseInt(makes);
-              existing.attempts += parseInt(attempts);
-            } else {
-              leaderboard.push({ name, makes: parseInt(makes), attempts: parseInt(attempts) });
-            }
-          }
-        });
-        updateLeaderboard();
-      };
-      reader.readAsText(file);
-    }
-
-    updateLeaderboard();
-  </script>
 </body>
 </html>
