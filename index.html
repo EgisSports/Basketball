@@ -15,7 +15,7 @@
     text-align: center;
   }
 
-  /* 🔥 NEW: Navigation Buttons */
+  /* Navigation Buttons */
   .nav-switch {
     display: flex;
     justify-content: center;
@@ -160,9 +160,9 @@
 
 <body>
 
-<!-- 🔥 NEW: Navigation Bar -->
+<!-- Navigation Bar -->
 <div class="nav-switch">
-  <button class="nav-active" onclick="window.location.href='Basketball.html'">🏀 Basketball</button>
+  <button class="nav-active" onclick="window.location.href='https://egissports.github.io/Basketball/'">🏀 Basketball</button>
   <button onclick="window.location.href='Quiddlerboard.html'">🃏 Quiddlerboard</button>
 </div>
 
@@ -195,9 +195,6 @@
 <footer>Data stored locally • Export CSV for backup</footer>
 
 <script>
-/* =====================
-   FROZEN 2025 DATA
-   ===================== */
 const leaderboard2025 = [
   { name: "Carl",     makes: 553, attempts: 922 },
   { name: "Sophie",   makes: 34,  attempts: 63  },
@@ -209,11 +206,7 @@ const leaderboard2025 = [
   { name: "John",     makes: 0,   attempts: 3   }
 ];
 
-/* =====================
-   2026 LIVE DATA
-   ===================== */
 let leaderboard2026 = JSON.parse(localStorage.getItem("leaderboard_2026")) || [];
-
 let currentYear = 2025;
 
 function switchYear(year) {
