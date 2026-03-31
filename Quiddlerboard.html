@@ -80,7 +80,7 @@
     }
     #currentPlayersSelect {
       width: 100%;
-      min-height: 120px;
+      min-height: 140px;
     }
     .small {
       font-size: 0.8rem;
@@ -119,12 +119,18 @@
         <button id="addScoreBtn" type="button">Add Score</button>
       </div>
 
-      <!-- Sorting -->
+      <!-- Sorting + CSV -->
       <div class="block">
-        <h3>Sort Totals</h3>
-        <button class="secondary" id="sortAscBtn" type="button">Sort Asc</button>
-        <button class="secondary" id="sortDescBtn" type="button">Sort Desc</button>
-        <p class="small">You can also click the column headers to sort.</p>
+        <h3>Sort & Data</h3>
+        <button class="secondary" id="sortAscBtn" type="button">Sort Total Asc</button>
+        <button class="secondary" id="sortDescBtn" type="button">Sort Total Desc</button>
+        <hr />
+        <button id="exportCsvBtn" type="button">Export CSV (name,games,total)</button>
+        <button id="importCsvBtn" type="button">Import CSV</button>
+        <input type="file" id="importCsvInput" accept=".csv" style="display:none" />
+        <p class="small">
+          Import will replace the current leaderboard with data from the CSV.
+        </p>
       </div>
     </div>
 
@@ -145,7 +151,7 @@
        CURRENT GAME MATRIX
        ============================ -->
   <div class="section">
-    <h2>Current Game Tracker (Dynamic Rounds, Up to 8)</h2>
+    <h2>Current Game Tracker (Static 8 Rounds)</h2>
 
     <div class="flex-row">
       <div class="block">
@@ -156,14 +162,25 @@
         <label>&nbsp;</label>
         <button id="startGameBtn" type="button">Start / Reset Current Game</button>
         <p class="small">
-          Rounds appear automatically as you start entering scores, up to 8 rounds.
+          Each row is a player; columns are rounds 1–8. Totals update as you type.
         </p>
       </div>
     </div>
 
     <table id="currentGameTable">
       <thead>
-        <!-- Filled dynamically -->
+        <tr>
+          <th>Player</th>
+          <th>R1</th>
+          <th>R2</th>
+          <th>R3</th>
+          <th>R4</th>
+          <th>R5</th>
+          <th>R6</th>
+          <th>R7</th>
+          <th>R8</th>
+          <th>Total</th>
+        </tr>
       </thead>
       <tbody>
         <!-- Filled dynamically -->
@@ -210,17 +227,19 @@
     const playersTableBody = document.querySelector('#playersTable tbody');
     const tableHeaders = document.querySelectorAll('#playersTable thead th.sortable');
 
+    const exportCsvBtn = document.getElementById('exportCsvBtn');
+    const importCsvBtn = document.getElementById('importCsvBtn');
+    const importCsvInput = document.getElementById('importCsvInput');
+
     const currentPlayersSelect = document.getElementById('currentPlayersSelect');
     const startGameBtn = document.getElementById('startGameBtn');
-    const currentGameTableHead = document.querySelector('#currentGameTable thead');
     const currentGameTableBody = document.querySelector('#currentGameTable tbody');
 
     let currentSort = { key: 'name', direction: 'asc' };
 
-    // Current game state
+    // Current game state: static 8 rounds
     let currentGame = {
-      maxRound: 0,
-      players: [] // [{ playerIndex: number, rounds: [number|null,...] }]
+      players: [] // [{ playerIndex: number, rounds: [number|null x8] }]
     };
 
     // ============================
@@ -345,33 +364,26 @@
     // ============================
     function renderCurrentGameTable() {
       if (!currentGame.players || currentGame.players.length === 0) {
-        currentGameTableHead.innerHTML = '';
         currentGameTableBody.innerHTML = '';
         return;
       }
 
-      // Header
-      let headHtml = '<tr><th>Player</th>';
-      for (let r = 1; r <= currentGame.maxRound; r++) {
-        headHtml += `<th>R${r}</th>`;
-      }
-      headHtml += '<th>Total</th></tr>';
-      currentGameTableHead.innerHTML = headHtml;
-
-      // Body
       let bodyHtml = '';
       currentGame.players.forEach((cgPlayer, idx) => {
         const basePlayer = players[cgPlayer.playerIndex];
         const name = basePlayer ? basePlayer.name : 'Unknown';
 
+        let total = 0;
+        const rounds = cgPlayer.rounds || [];
+        rounds.forEach(v => {
+          if (v !== null && !isNaN(v)) total += v;
+        });
+
         bodyHtml += `<tr data-row-index="${idx}"><td>${name}</td>`;
 
-        let total = 0;
-        for (let r = 1; r <= currentGame.maxRound; r++) {
-          const val = cgPlayer.rounds[r - 1];
+        for (let r = 1; r <= 8; r++) {
+          const val = rounds[r - 1];
           const displayVal = (val !== null && !isNaN(val)) ? val : '';
-          if (!isNaN(val) && val !== null) total += val;
-
           bodyHtml += `
             <td>
               <input
@@ -390,7 +402,6 @@
 
       currentGameTableBody.innerHTML = bodyHtml;
 
-      // Reattach listeners for new inputs
       const cgInputs = document.querySelectorAll('.cgRoundInput');
       cgInputs.forEach(input => {
         input.addEventListener('input', handleCurrentGameInput);
@@ -413,7 +424,6 @@
       if (!currentGame.players[rowIndex]) return;
       currentGame.players[rowIndex].rounds[round - 1] = numVal;
 
-      // Recalculate total for this row
       let total = 0;
       currentGame.players[rowIndex].rounds.forEach(v => {
         if (v !== null && !isNaN(v)) total += v;
@@ -423,18 +433,6 @@
       if (row) {
         const totalCell = row.querySelector('.cgTotalCell');
         if (totalCell) totalCell.textContent = total;
-      }
-
-      // Dynamic rounds: if we just entered something in the last round and haven't hit 8 yet, add another round
-      if (round === currentGame.maxRound && numVal !== null && currentGame.maxRound < 8) {
-        currentGame.maxRound += 1;
-        // Ensure all players have space for the new round
-        currentGame.players.forEach(p => {
-          if (p.rounds.length < currentGame.maxRound) {
-            p.rounds[currentGame.maxRound - 1] = null;
-          }
-        });
-        renderCurrentGameTable();
       }
     }
 
@@ -450,9 +448,8 @@
 
       currentGame.players = selectedOptions.map(opt => ({
         playerIndex: Number(opt.value),
-        rounds: [null] // start with 1 round
+        rounds: Array(8).fill(null)
       }));
-      currentGame.maxRound = 1;
 
       renderCurrentGameTable();
     }
@@ -483,11 +480,132 @@
     });
 
     // ============================
+    // CSV EXPORT (name,games,total)
+    // ============================
+    function exportCsv() {
+      let csv = 'name,games,total\n';
+      players.forEach(p => {
+        const games = Array.isArray(p.scores) ? p.scores.length : 0;
+        const total = Array.isArray(p.scores)
+          ? p.scores.reduce((sum, s) => sum + (Number(s) || 0), 0)
+          : 0;
+        const safeName = (p.name || '').replace(/"/g, '""');
+        csv += `"${safeName}",${games},${total}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'quiddler_leaderboard.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // ============================
+    // CSV IMPORT (name,games,total)
+    // ============================
+    function importCsvText(text) {
+      const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+      if (lines.length <= 1) {
+        alert('CSV appears to be empty or missing data.');
+        return;
+      }
+
+      const header = lines[0].toLowerCase();
+      if (!header.includes('name') || !header.includes('games') || !header.includes('total')) {
+        alert('CSV header must include name,games,total.');
+        return;
+      }
+
+      const newPlayers = [];
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line) continue;
+
+        // Simple CSV parsing for: "name",games,total
+        const parts = [];
+        let current = '';
+        let inQuotes = false;
+        for (let j = 0; j < line.length; j++) {
+          const ch = line[j];
+          if (ch === '"' ) {
+            if (inQuotes && line[j + 1] === '"') {
+              current += '"';
+              j++;
+            } else {
+              inQuotes = !inQuotes;
+            }
+          } else if (ch === ',' && !inQuotes) {
+            parts.push(current);
+            current = '';
+          } else {
+            current += ch;
+          }
+        }
+        parts.push(current);
+
+        if (parts.length < 3) continue;
+
+        const name = parts[0].trim();
+        const games = Number(parts[1]);
+        const total = Number(parts[2]);
+
+        if (!name) continue;
+        const safeGames = isNaN(games) || games < 0 ? 0 : games;
+        const safeTotal = isNaN(total) ? 0 : total;
+
+        let scores = [];
+        if (safeGames > 0) {
+          scores = [safeTotal, ...Array(safeGames - 1).fill(0)];
+        } else {
+          scores = [safeTotal];
+        }
+
+        newPlayers.push({ name, scores });
+      }
+
+      if (newPlayers.length === 0) {
+        alert('No valid player rows found in CSV.');
+        return;
+      }
+
+      if (!confirm('Importing will replace the current leaderboard. Continue?')) {
+        return;
+      }
+
+      players = newPlayers;
+      savePlayers();
+      renderPlayerSelects();
+      renderTable();
+    }
+
+    // ============================
     // BUTTON EVENTS
     // ============================
     addPlayerBtn.addEventListener('click', addPlayer);
     addScoreBtn.addEventListener('click', addScore);
     startGameBtn.addEventListener('click', startCurrentGame);
+
+    exportCsvBtn.addEventListener('click', exportCsv);
+
+    importCsvBtn.addEventListener('click', () => {
+      importCsvInput.value = '';
+      importCsvInput.click();
+    });
+
+    importCsvInput.addEventListener('change', () => {
+      const file = importCsvInput.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const text = e.target.result;
+        importCsvText(text);
+      };
+      reader.readAsText(file);
+    });
 
     // ============================
     // INITIAL RENDER
