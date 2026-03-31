@@ -1,661 +1,529 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Quiddlerboard</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background: #f5f5f5;
-    }
-    h1, h2 {
-      margin-bottom: 10px;
-    }
-    .section {
-      background: #ffffff;
-      padding: 15px;
-      margin-bottom: 25px;
-      border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    label {
-      display: block;
-      margin-bottom: 6px;
-      font-size: 0.9rem;
-      font-weight: bold;
-    }
-    input, select, button {
-      padding: 6px 8px;
-      font-size: 0.9rem;
-      margin-bottom: 8px;
-      box-sizing: border-box;
-    }
-    input, select {
-      width: 100%;
-    }
-    button {
-      cursor: pointer;
-      border-radius: 4px;
-      border: 1px solid #333;
-      background: #333;
-      color: #fff;
-    }
-    button.secondary {
-      background: #fff;
-      color: #333;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #ffffff;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    th, td {
-      padding: 8px 10px;
-      border-bottom: 1px solid #ddd;
-      text-align: left;
-    }
-    th {
-      background: #333;
-      color: #fff;
-      user-select: none;
-    }
-    th.sortable {
-      cursor: pointer;
-    }
-    tr:nth-child(even) {
-      background: #f9f9f9;
-    }
-    .flex-row {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-    .block {
-      min-width: 220px;
-      flex: 1;
-    }
-    #currentPlayersSelect {
-      width: 100%;
-      min-height: 140px;
-    }
-    .small {
-      font-size: 0.8rem;
-      color: #555;
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>Quiddlerboard</title>
+
+<style>
+  /* ============================
+     GLOBAL NEON THEME (matches Basketball.html)
+     ============================ */
+  body {
+    font-family: "Orbitron", sans-serif;
+    background: radial-gradient(circle at center, #0b1020 0%, #000 100%);
+    color: #fff;
+    margin: 0;
+    padding: 20px;
+  }
+
+  h1, h2, h3, h4 {
+    text-shadow: 0 0 20px #00ffcc;
+    letter-spacing: 1px;
+  }
+
+  .section {
+    background: rgba(255,255,255,0.05);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 0 25px rgba(0,255,204,0.25);
+    backdrop-filter: blur(10px);
+  }
+
+  input, select, button {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border: none;
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+  }
+
+  button {
+    cursor: pointer;
+    background: linear-gradient(90deg, #00ffcc, #00bfff);
+    color: #000;
+    font-weight: bold;
+    box-shadow: 0 0 15px #00ffcc;
+    transition: 0.3s;
+  }
+
+  button:hover {
+    box-shadow: 0 0 25px #00ffcc;
+    transform: scale(1.05);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  th, td {
+    padding: 10px;
+    text-align: left;
+  }
+
+  th {
+    background: rgba(0,255,204,0.2);
+    color: #00ffcc;
+    text-shadow: 0 0 10px #00ffcc;
+    cursor: pointer;
+  }
+
+  tr:nth-child(even) {
+    background: rgba(255,255,255,0.05);
+  }
+
+  .flex-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .block {
+    min-width: 220px;
+    flex: 1;
+  }
+
+  .small {
+    font-size: 0.8rem;
+    opacity: 0.7;
+  }
+
+  #currentPlayersSelect {
+    min-height: 140px;
+  }
+
+  /* ============================
+     NAVIGATION BAR (shared with Basketball.html)
+     ============================ */
+  .nav-switch {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px 0;
+  }
+
+  .nav-switch button {
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    background: linear-gradient(90deg, #00ffcc, #00bfff);
+    color: #000;
+    box-shadow: 0 0 15px #00ffcc;
+    border: none;
+    transition: 0.3s;
+  }
+
+  .nav-switch button:hover {
+    box-shadow: 0 0 25px #00ffcc;
+    transform: scale(1.05);
+  }
+
+  .nav-active {
+    background:#00ffcc !important;
+    color:#000 !important;
+    box-shadow:0 0 25px #00ffcc !important;
+  }
+</style>
 </head>
+
 <body>
 
-  <h1>Quiddlerboard</h1>
+<!-- ============================
+     NAVIGATION BAR
+     ============================ -->
+<div class="nav-switch">
+  <button onclick="window.location.href='Basketball.html'">🏀 Basketball</button>
+  <button class="nav-active" onclick="window.location.href='Quiddlerboard.html'">🃏 Quiddlerboard</button>
+</div>
 
-  <!-- ============================
-       ALL‑TIME LEADERBOARD
-       ============================ -->
-  <div class="section">
-    <h2>All‑Time Leaderboard</h2>
+<h1>🃏 Quiddlerboard</h1>
 
-    <div class="flex-row">
-      <!-- Add Player -->
-      <div class="block">
-        <h3>Add New Player</h3>
-        <label for="newPlayerName">Player name</label>
-        <input type="text" id="newPlayerName" placeholder="e.g. Drew" />
-        <button id="addPlayerBtn" type="button">Add Player</button>
-      </div>
+<!-- ============================
+     ALL‑TIME LEADERBOARD
+     ============================ -->
+<div class="section">
+  <h2>All‑Time Leaderboard</h2>
 
-      <!-- Add Score -->
-      <div class="block">
-        <h3>Add Game Score</h3>
-        <label for="playerSelect">Player</label>
-        <select id="playerSelect"></select>
-
-        <label for="scoreInput">Score to add</label>
-        <input type="number" id="scoreInput" placeholder="e.g. 42" />
-
-        <button id="addScoreBtn" type="button">Add Score</button>
-      </div>
-
-      <!-- Sort / CSV / Remove -->
-      <div class="block">
-        <h3>Sort & Data</h3>
-        <button class="secondary" id="sortAscBtn" type="button">Sort Total Asc</button>
-        <button class="secondary" id="sortDescBtn" type="button">Sort Total Desc</button>
-        <hr />
-        <button id="exportCsvBtn" type="button">Export CSV (name,games,total)</button>
-        <button id="importCsvBtn" type="button">Import CSV</button>
-        <input type="file" id="importCsvInput" accept=".csv" style="display:none" />
-        <hr />
-        <h4>Remove Player</h4>
-        <label for="removePlayerSelect">Select player to remove</label>
-        <select id="removePlayerSelect"></select>
-        <button id="removePlayerBtn" type="button">Remove Player</button>
-        <p class="small">
-          Import replaces the leaderboard. Remove deletes a player from all views and local storage.
-        </p>
-      </div>
+  <div class="flex-row">
+    <!-- Add Player -->
+    <div class="block">
+      <h3>Add New Player</h3>
+      <label>Player name</label>
+      <input type="text" id="newPlayerName" placeholder="e.g. Drew" />
+      <button id="addPlayerBtn">Add Player</button>
     </div>
 
-    <table id="playersTable">
-      <thead>
-        <tr>
-          <th class="sortable" data-sort-key="name">Player</th>
-          <th class="sortable" data-sort-key="games">Games Played</th>
-          <th class="sortable" data-sort-key="total">Total Points</th>
-          <th>Scores (per game)</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+    <!-- Add Score -->
+    <div class="block">
+      <h3>Add Game Score</h3>
+      <label>Player</label>
+      <select id="playerSelect"></select>
 
-  <!-- ============================
-       CURRENT GAME MATRIX
-       ============================ -->
-  <div class="section">
-    <h2>Current Game Tracker (Static 8 Rounds)</h2>
+      <label>Score to add</label>
+      <input type="number" id="scoreInput" placeholder="e.g. 42" />
 
-    <div class="flex-row">
-      <div class="block">
-        <label for="currentPlayersSelect">Select Players for This Game (Ctrl/Cmd+Click for multiple)</label>
-        <select id="currentPlayersSelect" multiple></select>
-      </div>
-      <div class="block">
-        <label>&nbsp;</label>
-        <button id="startGameBtn" type="button">Start / Reset Current Game</button>
-        <p class="small">
-          Each row is a player; columns are rounds 1–8. Totals update as you type.
-        </p>
-      </div>
+      <button id="addScoreBtn">Add Score</button>
     </div>
 
-    <table id="currentGameTable">
-      <thead>
-        <tr>
-          <th>Player</th>
-          <th>R1</th>
-          <th>R2</th>
-          <th>R3</th>
-          <th>R4</th>
-          <th>R5</th>
-          <th>R6</th>
-          <th>R7</th>
-          <th>R8</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Filled dynamically -->
-      </tbody>
-    </table>
+    <!-- Sort / CSV / Remove -->
+    <div class="block">
+      <h3>Sort & Data</h3>
+      <button id="sortAscBtn">Sort Total Asc</button>
+      <button id="sortDescBtn">Sort Total Desc</button>
+      <hr />
+      <button id="exportCsvBtn">Export CSV</button>
+      <button id="importCsvBtn">Import CSV</button>
+      <input type="file" id="importCsvInput" accept=".csv" style="display:none" />
+      <hr />
+      <h4>Remove Player</h4>
+      <select id="removePlayerSelect"></select>
+      <button id="removePlayerBtn">Remove Player</button>
+    </div>
   </div>
 
-  <script>
-    // ============================
-    // LOAD / SAVE LOCALSTORAGE
-    // ============================
-    function loadPlayersFromStorage() {
-      try {
-        const raw = localStorage.getItem("quiddlerPlayers");
-        if (!raw) return [];
-        const parsed = JSON.parse(raw);
-        if (!Array.isArray(parsed)) return [];
-        return parsed.map(p => ({
-          name: typeof p.name === "string" ? p.name : "",
-          scores: Array.isArray(p.scores) ? p.scores.map(n => Number(n) || 0) : []
-        }));
-      } catch (e) {
-        console.warn("Failed to load players from storage, resetting.", e);
-        return [];
-      }
+  <table id="playersTable">
+    <thead>
+      <tr>
+        <th data-sort-key="name">Player</th>
+        <th data-sort-key="games">Games Played</th>
+        <th data-sort-key="total">Total Points</th>
+        <th>Scores</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<!-- ============================
+     CURRENT GAME MATRIX
+     ============================ -->
+<div class="section">
+  <h2>Current Game Tracker (8 Rounds)</h2>
+
+  <div class="flex-row">
+    <div class="block">
+      <label>Select Players (Ctrl/Cmd+Click)</label>
+      <select id="currentPlayersSelect" multiple></select>
+    </div>
+
+    <div class="block">
+      <label>&nbsp;</label>
+      <button id="startGameBtn">Start / Reset Game</button>
+      <p class="small">Totals update live as you type.</p>
+    </div>
+  </div>
+
+  <table id="currentGameTable">
+    <thead>
+      <tr>
+        <th>Player</th>
+        <th>R1</th><th>R2</th><th>R3</th><th>R4</th>
+        <th>R5</th><th>R6</th><th>R7</th><th>R8</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+/* ============================================================
+   LOCAL STORAGE LOAD/SAVE
+   ============================================================ */
+function loadPlayersFromStorage() {
+  try {
+    const raw = localStorage.getItem("quiddlerPlayers");
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return parsed.map(p => ({
+      name: p.name || "",
+      scores: Array.isArray(p.scores) ? p.scores.map(n => Number(n)||0) : []
+    }));
+  } catch {
+    return [];
+  }
+}
+
+let players = loadPlayersFromStorage();
+function savePlayers() {
+  localStorage.setItem("quiddlerPlayers", JSON.stringify(players));
+}
+
+/* ============================================================
+   DOM ELEMENTS
+   ============================================================ */
+const newPlayerNameInput = document.getElementById("newPlayerName");
+const addPlayerBtn = document.getElementById("addPlayerBtn");
+const playerSelect = document.getElementById("playerSelect");
+const scoreInput = document.getElementById("scoreInput");
+const addScoreBtn = document.getElementById("addScoreBtn");
+const sortAscBtn = document.getElementById("sortAscBtn");
+const sortDescBtn = document.getElementById("sortDescBtn");
+const playersTableBody = document.querySelector("#playersTable tbody");
+const tableHeaders = document.querySelectorAll("#playersTable th[data-sort-key]");
+
+const exportCsvBtn = document.getElementById("exportCsvBtn");
+const importCsvBtn = document.getElementById("importCsvBtn");
+const importCsvInput = document.getElementById("importCsvInput");
+
+const removePlayerSelect = document.getElementById("removePlayerSelect");
+const removePlayerBtn = document.getElementById("removePlayerBtn");
+
+const currentPlayersSelect = document.getElementById("currentPlayersSelect");
+const startGameBtn = document.getElementById("startGameBtn");
+const currentGameTableBody = document.querySelector("#currentGameTable tbody");
+
+let currentSort = { key: "name", direction: "asc" };
+
+let currentGame = { players: [] };
+
+/* ============================================================
+   RENDER SELECTS
+   ============================================================ */
+function renderPlayerSelects() {
+  if (players.length === 0) {
+    playerSelect.innerHTML = "";
+    currentPlayersSelect.innerHTML = "";
+    removePlayerSelect.innerHTML = "<option>-- No players --</option>";
+    return;
+  }
+
+  const options = players
+    .map((p,i)=>`<option value="${i}">${p.name}</option>`)
+    .join("");
+
+  playerSelect.innerHTML = options;
+  currentPlayersSelect.innerHTML = options;
+  removePlayerSelect.innerHTML = `<option value="">-- Select player --</option>${options}`;
+}
+
+/* ============================================================
+   RENDER LEADERBOARD TABLE
+   ============================================================ */
+function renderTable() {
+  const sorted = [...players].sort((a,b)=>{
+    let A,B;
+    if (currentSort.key==="name") {
+      A=a.name.toLowerCase(); B=b.name.toLowerCase();
+    } else if (currentSort.key==="games") {
+      A=a.scores.length; B=b.scores.length;
+    } else {
+      A=a.scores.reduce((s,n)=>s+n,0);
+      B=b.scores.reduce((s,n)=>s+n,0);
     }
+    return currentSort.direction==="asc" ? A-B : B-A;
+  });
 
-    let players = loadPlayersFromStorage();
+  playersTableBody.innerHTML = sorted.map(p=>{
+    const games = p.scores.length;
+    const total = p.scores.reduce((s,n)=>s+n,0);
+    return `
+      <tr>
+        <td>${p.name}</td>
+        <td>${games}</td>
+        <td>${total}</td>
+        <td>${p.scores.join(", ")}</td>
+      </tr>
+    `;
+  }).join("");
+}
 
-    function savePlayers() {
-      localStorage.setItem("quiddlerPlayers", JSON.stringify(players));
+/* ============================================================
+   ADD PLAYER
+   ============================================================ */
+function addPlayer() {
+  const name = newPlayerNameInput.value.trim();
+  if (!name) return alert("Enter a name.");
+
+  if (players.some(p=>p.name.toLowerCase()===name.toLowerCase()))
+    return alert("Player already exists.");
+
+  players.push({ name, scores: [] });
+  savePlayers();
+  newPlayerNameInput.value="";
+  renderPlayerSelects();
+  renderTable();
+}
+
+/* ============================================================
+   REMOVE PLAYER
+   ============================================================ */
+function removePlayer() {
+  const idx = Number(removePlayerSelect.value);
+  if (isNaN(idx)) return alert("Select a player.");
+
+  const name = players[idx].name;
+  if (!confirm(`Remove ${name}?`)) return;
+
+  players.splice(idx,1);
+  savePlayers();
+
+  currentGame.players = [];
+  renderCurrentGameTable();
+
+  renderPlayerSelects();
+  renderTable();
+}
+
+/* ============================================================
+   ADD SCORE
+   ============================================================ */
+function addScore() {
+  const idx = Number(playerSelect.value);
+  const val = Number(scoreInput.value);
+
+  if (isNaN(idx)) return alert("Select a player.");
+  if (isNaN(val)) return alert("Enter a score.");
+
+  players[idx].scores.push(val);
+  savePlayers();
+  scoreInput.value="";
+  renderTable();
+}
+
+/* ============================================================
+   CURRENT GAME TABLE
+   ============================================================ */
+function renderCurrentGameTable() {
+  if (currentGame.players.length===0) {
+    currentGameTableBody.innerHTML="";
+    return;
+  }
+
+  currentGameTableBody.innerHTML = currentGame.players.map((cg,i)=>{
+    const name = players[cg.playerIndex]?.name || "Unknown";
+    const total = cg.rounds.reduce((s,n)=>s+(n||0),0);
+
+    let row = `<tr data-row="${i}"><td>${name}</td>`;
+    for (let r=0;r<8;r++) {
+      row += `
+        <td><input type="number" class="cgRoundInput"
+          data-player="${i}" data-round="${r}"
+          value="${cg.rounds[r] ?? ""}"></td>`;
     }
+    row += `<td class="cgTotal">${total}</td></tr>`;
+    return row;
+  }).join("");
 
-    // ============================
-    // DOM ELEMENTS
-    // ============================
-    const newPlayerNameInput = document.getElementById('newPlayerName');
-    const addPlayerBtn = document.getElementById('addPlayerBtn');
-    const playerSelect = document.getElementById('playerSelect');
-    const scoreInput = document.getElementById('scoreInput');
-    const addScoreBtn = document.getElementById('addScoreBtn');
-    const sortAscBtn = document.getElementById('sortAscBtn');
-    const sortDescBtn = document.getElementById('sortDescBtn');
-    const playersTableBody = document.querySelector('#playersTable tbody');
-    const tableHeaders = document.querySelectorAll('#playersTable thead th.sortable');
+  document.querySelectorAll(".cgRoundInput").forEach(inp=>{
+    inp.addEventListener("input", handleCurrentGameInput);
+  });
+}
 
-    const exportCsvBtn = document.getElementById('exportCsvBtn');
-    const importCsvBtn = document.getElementById('importCsvBtn');
-    const importCsvInput = document.getElementById('importCsvInput');
+function handleCurrentGameInput(e) {
+  const row = Number(e.target.dataset.player);
+  const round = Number(e.target.dataset.round);
+  const val = e.target.value==="" ? null : Number(e.target.value);
 
-    const removePlayerSelect = document.getElementById('removePlayerSelect');
-    const removePlayerBtn = document.getElementById('removePlayerBtn');
+  currentGame.players[row].rounds[round] = val;
 
-    const currentPlayersSelect = document.getElementById('currentPlayersSelect');
-    const startGameBtn = document.getElementById('startGameBtn');
-    const currentGameTableBody = document.querySelector('#currentGameTable tbody');
+  const total = currentGame.players[row].rounds.reduce((s,n)=>s+(n||0),0);
+  document.querySelector(`tr[data-row="${row}"] .cgTotal`).textContent = total;
+}
 
-    let currentSort = { key: 'name', direction: 'asc' };
+/* ============================================================
+   START GAME
+   ============================================================ */
+function startCurrentGame() {
+  const selected = [...currentPlayersSelect.selectedOptions];
+  if (selected.length===0) return alert("Select players.");
 
-    // Current game state: static 8 rounds
-    let currentGame = {
-      players: [] // [{ playerIndex: number, rounds: [number|null x8] }]
-    };
+  currentGame.players = selected.map(opt=>({
+    playerIndex: Number(opt.value),
+    rounds: Array(8).fill(null)
+  }));
 
-    // ============================
-    // RENDER SELECTS
-    // ============================
-    function renderPlayerSelects() {
-      if (!players || players.length === 0) {
-        playerSelect.innerHTML = '<option value="">-- No players yet --</option>';
-        currentPlayersSelect.innerHTML = '';
-        removePlayerSelect.innerHTML = '<option value="">-- No players yet --</option>';
-        return;
-      }
+  renderCurrentGameTable();
+}
 
-      const options = players
-        .map((p, index) => `<option value="${index}">${p.name}</option>`)
-        .join('');
+/* ============================================================
+   SORTING
+   ============================================================ */
+sortAscBtn.onclick = ()=>{ currentSort={key:"total",direction:"asc"}; renderTable(); };
+sortDescBtn.onclick = ()=>{ currentSort={key:"total",direction:"desc"}; renderTable(); };
 
-      playerSelect.innerHTML = options;
-      currentPlayersSelect.innerHTML = options;
-      removePlayerSelect.innerHTML = `<option value="">-- Select player --</option>${options}`;
+tableHeaders.forEach(th=>{
+  th.onclick = ()=>{
+    const key = th.dataset.sortKey;
+    if (!key) return;
+    if (currentSort.key===key)
+      currentSort.direction = currentSort.direction==="asc"?"desc":"asc";
+    else {
+      currentSort.key = key;
+      currentSort.direction = "asc";
     }
-
-    // ============================
-    // RENDER ALL‑TIME TABLE
-    // ============================
-    function renderTable() {
-      const sortedPlayers = [...players].sort((a, b) => {
-        let valA, valB;
-        if (currentSort.key === 'name') {
-          valA = (a.name || "").toLowerCase();
-          valB = (b.name || "").toLowerCase();
-        } else if (currentSort.key === 'games') {
-          valA = Array.isArray(a.scores) ? a.scores.length : 0;
-          valB = Array.isArray(b.scores) ? b.scores.length : 0;
-        } else if (currentSort.key === 'total') {
-          valA = Array.isArray(a.scores) ? a.scores.reduce((sum, s) => sum + (Number(s) || 0), 0) : 0;
-          valB = Array.isArray(b.scores) ? b.scores.reduce((sum, s) => sum + (Number(s) || 0), 0) : 0;
-        } else {
-          valA = 0;
-          valB = 0;
-        }
-
-        if (valA < valB) return currentSort.direction === 'asc' ? -1 : 1;
-        if (valA > valB) return currentSort.direction === 'asc' ? 1 : -1;
-        return 0;
-      });
-
-      playersTableBody.innerHTML = sortedPlayers
-        .map(player => {
-          const games = Array.isArray(player.scores) ? player.scores.length : 0;
-          const total = Array.isArray(player.scores)
-            ? player.scores.reduce((sum, s) => sum + (Number(s) || 0), 0)
-            : 0;
-          const scoresList = Array.isArray(player.scores) ? player.scores.join(', ') : '';
-          return `
-            <tr>
-              <td>${player.name}</td>
-              <td>${games}</td>
-              <td>${total}</td>
-              <td>${scoresList}</td>
-            </tr>
-          `;
-        })
-        .join('');
-    }
-
-    // ============================
-    // ADD PLAYER
-    // ============================
-    function addPlayer() {
-      const name = newPlayerNameInput.value.trim();
-      if (!name) {
-        alert('Please enter a player name.');
-        return;
-      }
-
-      const exists = players.some(p => (p.name || "").toLowerCase() === name.toLowerCase());
-      if (exists) {
-        alert('That player already exists.');
-        return;
-      }
-
-      players.push({ name, scores: [] });
-      savePlayers();
-      newPlayerNameInput.value = '';
-      renderPlayerSelects();
-      renderTable();
-    }
-
-    // ============================
-    // REMOVE PLAYER
-    // ============================
-    function removePlayer() {
-      const idxStr = removePlayerSelect.value;
-      if (idxStr === '') {
-        alert('Select a player to remove.');
-        return;
-      }
-      const index = Number(idxStr);
-      if (isNaN(index) || index < 0 || index >= players.length) return;
-
-      const name = players[index].name || 'this player';
-      if (!confirm(`Remove ${name} from the leaderboard? This cannot be undone.`)) return;
-
-      players.splice(index, 1);
-      savePlayers();
-
-      // Reset current game (simplest, avoids index mismatch)
-      currentGame.players = [];
-      renderCurrentGameTable();
-
-      renderPlayerSelects();
-      renderTable();
-    }
-
-    // ============================
-    // ADD SCORE
-    // ============================
-    function addScore() {
-      const playerIndex = playerSelect.value;
-      const scoreValue = scoreInput.value.trim();
-
-      if (playerIndex === '') {
-        alert('Please select a player.');
-        return;
-      }
-      if (scoreValue === '') {
-        alert('Please enter a score.');
-        return;
-      }
-
-      const score = Number(scoreValue);
-      if (isNaN(score)) {
-        alert('Score must be a number.');
-        return;
-      }
-
-      if (!Array.isArray(players[playerIndex].scores)) {
-        players[playerIndex].scores = [];
-      }
-
-      players[playerIndex].scores.push(score);
-      savePlayers();
-      scoreInput.value = '';
-      renderTable();
-    }
-
-    // ============================
-    // CURRENT GAME: RENDER TABLE
-    // ============================
-    function renderCurrentGameTable() {
-      if (!currentGame.players || currentGame.players.length === 0) {
-        currentGameTableBody.innerHTML = '';
-        return;
-      }
-
-      let bodyHtml = '';
-      currentGame.players.forEach((cgPlayer, idx) => {
-        const basePlayer = players[cgPlayer.playerIndex];
-        const name = basePlayer ? basePlayer.name : 'Unknown';
-
-        let total = 0;
-        const rounds = cgPlayer.rounds || [];
-        rounds.forEach(v => {
-          if (v !== null && !isNaN(v)) total += v;
-        });
-
-        bodyHtml += `<tr data-row-index="${idx}"><td>${name}</td>`;
-
-        for (let r = 1; r <= 8; r++) {
-          const val = rounds[r - 1];
-          const displayVal = (val !== null && !isNaN(val)) ? val : '';
-          bodyHtml += `
-            <td>
-              <input
-                type="number"
-                class="cgRoundInput"
-                data-player-row="${idx}"
-                data-round="${r}"
-                value="${displayVal}"
-              />
-            </td>
-          `;
-        }
-
-        bodyHtml += `<td class="cgTotalCell">${total}</td></tr>`;
-      });
-
-      currentGameTableBody.innerHTML = bodyHtml;
-
-      const cgInputs = document.querySelectorAll('.cgRoundInput');
-      cgInputs.forEach(input => {
-        input.addEventListener('input', handleCurrentGameInput);
-      });
-    }
-
-    // ============================
-    // CURRENT GAME: HANDLE INPUT
-    // ============================
-    function handleCurrentGameInput(e) {
-      const input = e.target;
-      const rowIndex = Number(input.getAttribute('data-player-row'));
-      const round = Number(input.getAttribute('data-round'));
-      if (isNaN(rowIndex) || isNaN(round)) return;
-
-      const val = input.value.trim();
-      const numVal = val === '' ? null : Number(val);
-      if (val !== '' && isNaN(numVal)) return;
-
-      if (!currentGame.players[rowIndex]) return;
-      currentGame.players[rowIndex].rounds[round - 1] = numVal;
-
-      let total = 0;
-      currentGame.players[rowIndex].rounds.forEach(v => {
-        if (v !== null && !isNaN(v)) total += v;
-      });
-
-      const row = currentGameTableBody.querySelector(`tr[data-row-index="${rowIndex}"]`);
-      if (row) {
-        const totalCell = row.querySelector('.cgTotalCell');
-        if (totalCell) totalCell.textContent = total;
-      }
-    }
-
-    // ============================
-    // CURRENT GAME: START / RESET
-    // ============================
-    function startCurrentGame() {
-      const selectedOptions = Array.from(currentPlayersSelect.selectedOptions);
-      if (selectedOptions.length === 0) {
-        alert('Select at least one player for the current game.');
-        return;
-      }
-
-      currentGame.players = selectedOptions.map(opt => ({
-        playerIndex: Number(opt.value),
-        rounds: Array(8).fill(null)
-      }));
-
-      renderCurrentGameTable();
-    }
-
-    // ============================
-    // SORTING
-    // ============================
-    function setSort(key, direction) {
-      currentSort = { key, direction };
-      renderTable();
-    }
-
-    sortAscBtn.addEventListener('click', () => setSort('total', 'asc'));
-    sortDescBtn.addEventListener('click', () => setSort('total', 'desc'));
-
-    tableHeaders.forEach(th => {
-      th.addEventListener('click', () => {
-        const key = th.getAttribute('data-sort-key');
-        if (!key) return;
-        if (currentSort.key === key) {
-          currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-        } else {
-          currentSort.key = key;
-          currentSort.direction = 'asc';
-        }
-        renderTable();
-      });
-    });
-
-    // ============================
-    // CSV EXPORT (name,games,total)
-    // ============================
-    function exportCsv() {
-      let csv = 'name,games,total\n';
-      players.forEach(p => {
-        const games = Array.isArray(p.scores) ? p.scores.length : 0;
-        const total = Array.isArray(p.scores)
-          ? p.scores.reduce((sum, s) => sum + (Number(s) || 0), 0)
-          : 0;
-        const safeName = (p.name || '').replace(/"/g, '""');
-        csv += `"${safeName}",${games},${total}\n`;
-      });
-
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'quiddler_leaderboard.csv';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-
-    // ============================
-    // CSV IMPORT (name,games,total)
-    // ============================
-    function importCsvText(text) {
-      const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
-      if (lines.length <= 1) {
-        alert('CSV appears to be empty or missing data.');
-        return;
-      }
-
-      const header = lines[0].toLowerCase();
-      if (!header.includes('name') || !header.includes('games') || !header.includes('total')) {
-        alert('CSV header must include name,games,total.');
-        return;
-      }
-
-      const newPlayers = [];
-      for (let i = 1; i < lines.length; i++) {
-        const line = lines[i];
-        if (!line) continue;
-
-        // Simple CSV parsing for: "name",games,total
-        const parts = [];
-        let current = '';
-        let inQuotes = false;
-        for (let j = 0; j < line.length; j++) {
-          const ch = line[j];
-          if (ch === '"' ) {
-            if (inQuotes && line[j + 1] === '"') {
-              current += '"';
-              j++;
-            } else {
-              inQuotes = !inQuotes;
-            }
-          } else if (ch === ',' && !inQuotes) {
-            parts.push(current);
-            current = '';
-          } else {
-            current += ch;
-          }
-        }
-        parts.push(current);
-
-        if (parts.length < 3) continue;
-
-        const name = parts[0].trim().replace(/^"|"$/g, '');
-        const games = Number(parts[1]);
-        const total = Number(parts[2]);
-
-        if (!name) continue;
-        const safeGames = isNaN(games) || games < 0 ? 0 : games;
-        const safeTotal = isNaN(total) ? 0 : total;
-
-        let scores = [];
-        if (safeGames > 0) {
-          scores = [safeTotal, ...Array(safeGames - 1).fill(0)];
-        } else {
-          scores = [safeTotal];
-        }
-
-        newPlayers.push({ name, scores });
-      }
-
-      if (newPlayers.length === 0) {
-        alert('No valid player rows found in CSV.');
-        return;
-      }
-
-      if (!confirm('Importing will replace the current leaderboard. Continue?')) {
-        return;
-      }
-
-      players = newPlayers;
-      savePlayers();
-
-      // Reset current game after import
-      currentGame.players = [];
-      renderCurrentGameTable();
-
-      renderPlayerSelects();
-      renderTable();
-    }
-
-    // ============================
-    // BUTTON EVENTS
-    // ============================
-    addPlayerBtn.addEventListener('click', addPlayer);
-    addScoreBtn.addEventListener('click', addScore);
-    removePlayerBtn.addEventListener('click', removePlayer);
-    startGameBtn.addEventListener('click', startCurrentGame);
-
-    exportCsvBtn.addEventListener('click', exportCsv);
-
-    importCsvBtn.addEventListener('click', () => {
-      importCsvInput.value = '';
-      importCsvInput.click();
-    });
-
-    importCsvInput.addEventListener('change', () => {
-      const file = importCsvInput.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = e => {
-        const text = e.target.result;
-        importCsvText(text);
-      };
-      reader.readAsText(file);
-    });
-
-    // ============================
-    // INITIAL RENDER
-    // ============================
-    renderPlayerSelects();
     renderTable();
-    renderCurrentGameTable();
-  </script>
+  };
+});
+
+/* ============================================================
+   CSV EXPORT / IMPORT
+   ============================================================ */
+function exportCsv() {
+  let csv = "name,games,total\n";
+  players.forEach(p=>{
+    const games = p.scores.length;
+    const total = p.scores.reduce((s,n)=>s+n,0);
+    csv += `"${p.name}",${games},${total}\n`;
+  });
+
+  const blob = new Blob([csv],{type:"text/csv"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "quiddler_leaderboard.csv";
+  a.click();
+}
+
+function importCsvText(text) {
+  const lines = text.split(/\r?\n/).filter(l=>l.trim());
+  if (lines.length<=1) return alert("CSV empty.");
+
+  const newPlayers = [];
+  for (let i=1;i<lines.length;i++) {
+    const [name,games,total] = lines[i].split(",");
+    if (!name) continue;
+
+    const g = Number(games);
+    const t = Number(total);
+
+    const scores = g>0 ? [t, ...Array(g-1).fill(0)] : [t];
+    newPlayers.push({ name:name.replace(/"/g,""), scores });
+  }
+
+  if (!confirm("Replace leaderboard with CSV data?")) return;
+
+  players = newPlayers;
+  savePlayers();
+  currentGame.players=[];
+  renderCurrentGameTable();
+  renderPlayerSelects();
+  renderTable();
+}
+
+exportCsvBtn.onclick = exportCsv;
+importCsvBtn.onclick = ()=>importCsvInput.click();
+importCsvInput.onchange = e=>{
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>importCsvText(reader.result);
+  reader.readAsText(file);
+};
+
+/* ============================================================
+   INITIAL RENDER
+   ============================================================ */
+renderPlayerSelects();
+renderTable();
+renderCurrentGameTable();
+</script>
 
 </body>
 </html>
