@@ -29,8 +29,10 @@
       padding: 6px 8px;
       font-size: 0.9rem;
       margin-bottom: 8px;
-      width: 100%;
       box-sizing: border-box;
+    }
+    input, select {
+      width: 100%;
     }
     button {
       cursor: pointer;
@@ -59,23 +61,30 @@
     th {
       background: #333;
       color: #fff;
-      cursor: pointer;
       user-select: none;
+    }
+    th.sortable {
+      cursor: pointer;
     }
     tr:nth-child(even) {
       background: #f9f9f9;
     }
-    .round-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-top: 10px;
+    .flex-row {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
     }
-    .round-box {
-      background: #fafafa;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ddd;
+    .block {
+      min-width: 220px;
+      flex: 1;
+    }
+    #currentPlayersSelect {
+      width: 100%;
+      min-height: 120px;
+    }
+    .small {
+      font-size: 0.8rem;
+      color: #555;
     }
   </style>
 </head>
@@ -89,10 +98,9 @@
   <div class="section">
     <h2>All‑Time Leaderboard</h2>
 
-    <div style="display:flex; gap:20px; flex-wrap:wrap;">
-
+    <div class="flex-row">
       <!-- Add Player -->
-      <div style="min-width:220px;">
+      <div class="block">
         <h3>Add New Player</h3>
         <label for="newPlayerName">Player name</label>
         <input type="text" id="newPlayerName" placeholder="e.g. Drew" />
@@ -100,7 +108,7 @@
       </div>
 
       <!-- Add Score -->
-      <div style="min-width:220px;">
+      <div class="block">
         <h3>Add Game Score</h3>
         <label for="playerSelect">Player</label>
         <select id="playerSelect"></select>
@@ -112,20 +120,20 @@
       </div>
 
       <!-- Sorting -->
-      <div style="min-width:220px;">
+      <div class="block">
         <h3>Sort Totals</h3>
         <button class="secondary" id="sortAscBtn" type="button">Sort Asc</button>
         <button class="secondary" id="sortDescBtn" type="button">Sort Desc</button>
+        <p class="small">You can also click the column headers to sort.</p>
       </div>
-
     </div>
 
     <table id="playersTable">
       <thead>
         <tr>
-          <th data-sort-key="name">Player</th>
-          <th data-sort-key="games">Games Played</th>
-          <th data-sort-key="total">Total Points</th>
+          <th class="sortable" data-sort-key="name">Player</th>
+          <th class="sortable" data-sort-key="games">Games Played</th>
+          <th class="sortable" data-sort-key="total">Total Points</th>
           <th>Scores (per game)</th>
         </tr>
       </thead>
@@ -134,55 +142,38 @@
   </div>
 
   <!-- ============================
-       CURRENT GAME TRACKER
+       CURRENT GAME MATRIX
        ============================ -->
   <div class="section">
-    <h2>Current Game Tracker (Up to 8 Rounds)</h2>
+    <h2>Current Game Tracker (Dynamic Rounds, Up to 8)</h2>
 
-    <label for="currentPlayerSelect">Select Player</label>
-    <select id="currentPlayerSelect"></select>
-
-    <div class="round-grid">
-      <div class="round-box">
-        <label>Round 1</label>
-        <input type="number" class="roundInput" data-round="1">
+    <div class="flex-row">
+      <div class="block">
+        <label for="currentPlayersSelect">Select Players for This Game (Ctrl/Cmd+Click for multiple)</label>
+        <select id="currentPlayersSelect" multiple></select>
       </div>
-      <div class="round-box">
-        <label>Round 2</label>
-        <input type="number" class="roundInput" data-round="2">
-      </div>
-      <div class="round-box">
-        <label>Round 3</label>
-        <input type="number" class="roundInput" data-round="3">
-      </div>
-      <div class="round-box">
-        <label>Round 4</label>
-        <input type="number" class="roundInput" data-round="4">
-      </div>
-      <div class="round-box">
-        <label>Round 5</label>
-        <input type="number" class="roundInput" data-round="5">
-      </div>
-      <div class="round-box">
-        <label>Round 6</label>
-        <input type="number" class="roundInput" data-round="6">
-      </div>
-      <div class="round-box">
-        <label>Round 7</label>
-        <input type="number" class="roundInput" data-round="7">
-      </div>
-      <div class="round-box">
-        <label>Round 8</label>
-        <input type="number" class="roundInput" data-round="8">
+      <div class="block">
+        <label>&nbsp;</label>
+        <button id="startGameBtn" type="button">Start / Reset Current Game</button>
+        <p class="small">
+          Rounds appear automatically as you start entering scores, up to 8 rounds.
+        </p>
       </div>
     </div>
 
-    <h3>Total This Game: <span id="currentGameTotal">0</span></h3>
+    <table id="currentGameTable">
+      <thead>
+        <!-- Filled dynamically -->
+      </thead>
+      <tbody>
+        <!-- Filled dynamically -->
+      </tbody>
+    </table>
   </div>
 
   <script>
     // ============================
-    // SAFE LOAD FROM LOCALSTORAGE
+    // LOAD / SAVE LOCALSTORAGE
     // ============================
     function loadPlayersFromStorage() {
       try {
@@ -190,7 +181,6 @@
         if (!raw) return [];
         const parsed = JSON.parse(raw);
         if (!Array.isArray(parsed)) return [];
-        // Normalize shape in case of old data
         return parsed.map(p => ({
           name: typeof p.name === "string" ? p.name : "",
           scores: Array.isArray(p.scores) ? p.scores.map(n => Number(n) || 0) : []
@@ -213,17 +203,25 @@
     const newPlayerNameInput = document.getElementById('newPlayerName');
     const addPlayerBtn = document.getElementById('addPlayerBtn');
     const playerSelect = document.getElementById('playerSelect');
-    const currentPlayerSelect = document.getElementById('currentPlayerSelect');
     const scoreInput = document.getElementById('scoreInput');
     const addScoreBtn = document.getElementById('addScoreBtn');
     const sortAscBtn = document.getElementById('sortAscBtn');
     const sortDescBtn = document.getElementById('sortDescBtn');
     const playersTableBody = document.querySelector('#playersTable tbody');
-    const tableHeaders = document.querySelectorAll('#playersTable thead th[data-sort-key]');
-    const roundInputs = document.querySelectorAll('.roundInput');
-    const currentGameTotalDisplay = document.getElementById('currentGameTotal');
+    const tableHeaders = document.querySelectorAll('#playersTable thead th.sortable');
+
+    const currentPlayersSelect = document.getElementById('currentPlayersSelect');
+    const startGameBtn = document.getElementById('startGameBtn');
+    const currentGameTableHead = document.querySelector('#currentGameTable thead');
+    const currentGameTableBody = document.querySelector('#currentGameTable tbody');
 
     let currentSort = { key: 'name', direction: 'asc' };
+
+    // Current game state
+    let currentGame = {
+      maxRound: 0,
+      players: [] // [{ playerIndex: number, rounds: [number|null,...] }]
+    };
 
     // ============================
     // RENDER SELECTS
@@ -231,7 +229,7 @@
     function renderPlayerSelects() {
       if (!players || players.length === 0) {
         playerSelect.innerHTML = '<option value="">-- No players yet --</option>';
-        currentPlayerSelect.innerHTML = '<option value="">-- No players yet --</option>';
+        currentPlayersSelect.innerHTML = '';
         return;
       }
 
@@ -240,11 +238,11 @@
         .join('');
 
       playerSelect.innerHTML = options;
-      currentPlayerSelect.innerHTML = options;
+      currentPlayersSelect.innerHTML = options;
     }
 
     // ============================
-    // RENDER TABLE
+    // RENDER ALL‑TIME TABLE
     // ============================
     function renderTable() {
       const sortedPlayers = [...players].sort((a, b) => {
@@ -343,20 +341,121 @@
     }
 
     // ============================
-    // CURRENT GAME TRACKER
+    // CURRENT GAME: RENDER TABLE
     // ============================
-    function updateCurrentGameTotal() {
-      let total = 0;
-      roundInputs.forEach(input => {
-        const val = Number(input.value);
-        if (!isNaN(val)) total += val;
+    function renderCurrentGameTable() {
+      if (!currentGame.players || currentGame.players.length === 0) {
+        currentGameTableHead.innerHTML = '';
+        currentGameTableBody.innerHTML = '';
+        return;
+      }
+
+      // Header
+      let headHtml = '<tr><th>Player</th>';
+      for (let r = 1; r <= currentGame.maxRound; r++) {
+        headHtml += `<th>R${r}</th>`;
+      }
+      headHtml += '<th>Total</th></tr>';
+      currentGameTableHead.innerHTML = headHtml;
+
+      // Body
+      let bodyHtml = '';
+      currentGame.players.forEach((cgPlayer, idx) => {
+        const basePlayer = players[cgPlayer.playerIndex];
+        const name = basePlayer ? basePlayer.name : 'Unknown';
+
+        bodyHtml += `<tr data-row-index="${idx}"><td>${name}</td>`;
+
+        let total = 0;
+        for (let r = 1; r <= currentGame.maxRound; r++) {
+          const val = cgPlayer.rounds[r - 1];
+          const displayVal = (val !== null && !isNaN(val)) ? val : '';
+          if (!isNaN(val) && val !== null) total += val;
+
+          bodyHtml += `
+            <td>
+              <input
+                type="number"
+                class="cgRoundInput"
+                data-player-row="${idx}"
+                data-round="${r}"
+                value="${displayVal}"
+              />
+            </td>
+          `;
+        }
+
+        bodyHtml += `<td class="cgTotalCell">${total}</td></tr>`;
       });
-      currentGameTotalDisplay.textContent = total;
+
+      currentGameTableBody.innerHTML = bodyHtml;
+
+      // Reattach listeners for new inputs
+      const cgInputs = document.querySelectorAll('.cgRoundInput');
+      cgInputs.forEach(input => {
+        input.addEventListener('input', handleCurrentGameInput);
+      });
     }
 
-    roundInputs.forEach(input => {
-      input.addEventListener('input', updateCurrentGameTotal);
-    });
+    // ============================
+    // CURRENT GAME: HANDLE INPUT
+    // ============================
+    function handleCurrentGameInput(e) {
+      const input = e.target;
+      const rowIndex = Number(input.getAttribute('data-player-row'));
+      const round = Number(input.getAttribute('data-round'));
+      if (isNaN(rowIndex) || isNaN(round)) return;
+
+      const val = input.value.trim();
+      const numVal = val === '' ? null : Number(val);
+      if (val !== '' && isNaN(numVal)) return;
+
+      if (!currentGame.players[rowIndex]) return;
+      currentGame.players[rowIndex].rounds[round - 1] = numVal;
+
+      // Recalculate total for this row
+      let total = 0;
+      currentGame.players[rowIndex].rounds.forEach(v => {
+        if (v !== null && !isNaN(v)) total += v;
+      });
+
+      const row = currentGameTableBody.querySelector(`tr[data-row-index="${rowIndex}"]`);
+      if (row) {
+        const totalCell = row.querySelector('.cgTotalCell');
+        if (totalCell) totalCell.textContent = total;
+      }
+
+      // Dynamic rounds: if we just entered something in the last round and haven't hit 8 yet, add another round
+      if (round === currentGame.maxRound && numVal !== null && currentGame.maxRound < 8) {
+        currentGame.maxRound += 1;
+        // Ensure all players have space for the new round
+        currentGame.players.forEach(p => {
+          if (p.rounds.length < currentGame.maxRound) {
+            p.rounds[currentGame.maxRound - 1] = null;
+          }
+        });
+        renderCurrentGameTable();
+      }
+    }
+
+    // ============================
+    // CURRENT GAME: START / RESET
+    // ============================
+    function startCurrentGame() {
+      const selectedOptions = Array.from(currentPlayersSelect.selectedOptions);
+      if (selectedOptions.length === 0) {
+        alert('Select at least one player for the current game.');
+        return;
+      }
+
+      currentGame.players = selectedOptions.map(opt => ({
+        playerIndex: Number(opt.value),
+        rounds: [null] // start with 1 round
+      }));
+      currentGame.maxRound = 1;
+
+      renderCurrentGameTable();
+    }
 
     // ============================
     // SORTING
@@ -388,13 +487,14 @@
     // ============================
     addPlayerBtn.addEventListener('click', addPlayer);
     addScoreBtn.addEventListener('click', addScore);
+    startGameBtn.addEventListener('click', startCurrentGame);
 
     // ============================
     // INITIAL RENDER
     // ============================
     renderPlayerSelects();
     renderTable();
-    updateCurrentGameTotal();
+    renderCurrentGameTable();
   </script>
 
 </body>
