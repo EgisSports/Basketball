@@ -84,7 +84,7 @@
   <h1>Quiddlerboard</h1>
 
   <!-- ============================
-       ADD PLAYER + ADD SCORE
+       ALL‑TIME LEADERBOARD
        ============================ -->
   <div class="section">
     <h2>All‑Time Leaderboard</h2>
@@ -96,7 +96,7 @@
         <h3>Add New Player</h3>
         <label for="newPlayerName">Player name</label>
         <input type="text" id="newPlayerName" placeholder="e.g. Drew" />
-        <button id="addPlayerBtn">Add Player</button>
+        <button id="addPlayerBtn" type="button">Add Player</button>
       </div>
 
       <!-- Add Score -->
@@ -108,14 +108,14 @@
         <label for="scoreInput">Score to add</label>
         <input type="number" id="scoreInput" placeholder="e.g. 42" />
 
-        <button id="addScoreBtn">Add Score</button>
+        <button id="addScoreBtn" type="button">Add Score</button>
       </div>
 
       <!-- Sorting -->
       <div style="min-width:220px;">
         <h3>Sort Totals</h3>
-        <button class="secondary" id="sortAscBtn">Sort Asc</button>
-        <button class="secondary" id="sortDescBtn">Sort Desc</button>
+        <button class="secondary" id="sortAscBtn" type="button">Sort Asc</button>
+        <button class="secondary" id="sortDescBtn" type="button">Sort Desc</button>
       </div>
 
     </div>
@@ -143,7 +143,6 @@
     <select id="currentPlayerSelect"></select>
 
     <div class="round-grid">
-      <!-- 8 round inputs -->
       <div class="round-box">
         <label>Round 1</label>
         <input type="number" class="roundInput" data-round="1">
@@ -182,18 +181,35 @@
   </div>
 
   <script>
-    /* ============================
-       LOAD / SAVE LOCAL STORAGE
-       ============================ */
-    let players = JSON.parse(localStorage.getItem("quiddlerPlayers") || "[]");
+    // ============================
+    // SAFE LOAD FROM LOCALSTORAGE
+    // ============================
+    function loadPlayersFromStorage() {
+      try {
+        const raw = localStorage.getItem("quiddlerPlayers");
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+        // Normalize shape in case of old data
+        return parsed.map(p => ({
+          name: typeof p.name === "string" ? p.name : "",
+          scores: Array.isArray(p.scores) ? p.scores.map(n => Number(n) || 0) : []
+        }));
+      } catch (e) {
+        console.warn("Failed to load players from storage, resetting.", e);
+        return [];
+      }
+    }
+
+    let players = loadPlayersFromStorage();
 
     function savePlayers() {
       localStorage.setItem("quiddlerPlayers", JSON.stringify(players));
     }
 
-    /* ============================
-       DOM ELEMENTS
-       ============================ */
+    // ============================
+    // DOM ELEMENTS
+    // ============================
     const newPlayerNameInput = document.getElementById('newPlayerName');
     const addPlayerBtn = document.getElementById('addPlayerBtn');
     const playerSelect = document.getElementById('playerSelect');
@@ -209,11 +225,11 @@
 
     let currentSort = { key: 'name', direction: 'asc' };
 
-    /* ============================
-       RENDER FUNCTIONS
-       ============================ */
+    // ============================
+    // RENDER SELECTS
+    // ============================
     function renderPlayerSelects() {
-      if (players.length === 0) {
+      if (!players || players.length === 0) {
         playerSelect.innerHTML = '<option value="">-- No players yet --</option>';
         currentPlayerSelect.innerHTML = '<option value="">-- No players yet --</option>';
         return;
@@ -227,19 +243,26 @@
       currentPlayerSelect.innerHTML = options;
     }
 
+    // ============================
+    // RENDER TABLE
+    // ============================
     function renderTable() {
       const sortedPlayers = [...players].sort((a, b) => {
         let valA, valB;
         if (currentSort.key === 'name') {
-          valA = a.name.toLowerCase();
-          valB = b.name.toLowerCase();
+          valA = (a.name || "").toLowerCase();
+          valB = (b.name || "").toLowerCase();
         } else if (currentSort.key === 'games') {
-          valA = a.scores.length;
-          valB = b.scores.length;
+          valA = Array.isArray(a.scores) ? a.scores.length : 0;
+          valB = Array.isArray(b.scores) ? b.scores.length : 0;
         } else if (currentSort.key === 'total') {
-          valA = a.scores.reduce((sum, s) => sum + s, 0);
-          valB = b.scores.reduce((sum, s) => sum + s, 0);
+          valA = Array.isArray(a.scores) ? a.scores.reduce((sum, s) => sum + (Number(s) || 0), 0) : 0;
+          valB = Array.isArray(b.scores) ? b.scores.reduce((sum, s) => sum + (Number(s) || 0), 0) : 0;
+        } else {
+          valA = 0;
+          valB = 0;
         }
+
         if (valA < valB) return currentSort.direction === 'asc' ? -1 : 1;
         if (valA > valB) return currentSort.direction === 'asc' ? 1 : -1;
         return 0;
@@ -247,9 +270,11 @@
 
       playersTableBody.innerHTML = sortedPlayers
         .map(player => {
-          const games = player.scores.length;
-          const total = player.scores.reduce((sum, s) => sum + s, 0);
-          const scoresList = player.scores.join(', ');
+          const games = Array.isArray(player.scores) ? player.scores.length : 0;
+          const total = Array.isArray(player.scores)
+            ? player.scores.reduce((sum, s) => sum + (Number(s) || 0), 0)
+            : 0;
+          const scoresList = Array.isArray(player.scores) ? player.scores.join(', ') : '';
           return `
             <tr>
               <td>${player.name}</td>
@@ -262,15 +287,21 @@
         .join('');
     }
 
-    /* ============================
-       ADD PLAYER / SCORE
-       ============================ */
+    // ============================
+    // ADD PLAYER
+    // ============================
     function addPlayer() {
       const name = newPlayerNameInput.value.trim();
-      if (!name) return alert('Please enter a player name.');
+      if (!name) {
+        alert('Please enter a player name.');
+        return;
+      }
 
-      const exists = players.some(p => p.name.toLowerCase() === name.toLowerCase());
-      if (exists) return alert('That player already exists.');
+      const exists = players.some(p => (p.name || "").toLowerCase() === name.toLowerCase());
+      if (exists) {
+        alert('That player already exists.');
+        return;
+      }
 
       players.push({ name, scores: [] });
       savePlayers();
@@ -279,15 +310,31 @@
       renderTable();
     }
 
+    // ============================
+    // ADD SCORE
+    // ============================
     function addScore() {
       const playerIndex = playerSelect.value;
       const scoreValue = scoreInput.value.trim();
 
-      if (playerIndex === '') return alert('Please select a player.');
-      if (scoreValue === '') return alert('Please enter a score.');
+      if (playerIndex === '') {
+        alert('Please select a player.');
+        return;
+      }
+      if (scoreValue === '') {
+        alert('Please enter a score.');
+        return;
+      }
 
       const score = Number(scoreValue);
-      if (isNaN(score)) return alert('Score must be a number.');
+      if (isNaN(score)) {
+        alert('Score must be a number.');
+        return;
+      }
+
+      if (!Array.isArray(players[playerIndex].scores)) {
+        players[playerIndex].scores = [];
+      }
 
       players[playerIndex].scores.push(score);
       savePlayers();
@@ -295,9 +342,9 @@
       renderTable();
     }
 
-    /* ============================
-       CURRENT GAME TRACKER
-       ============================ */
+    // ============================
+    // CURRENT GAME TRACKER
+    // ============================
     function updateCurrentGameTotal() {
       let total = 0;
       roundInputs.forEach(input => {
@@ -311,9 +358,9 @@
       input.addEventListener('input', updateCurrentGameTotal);
     });
 
-    /* ============================
-       SORTING
-       ============================ */
+    // ============================
+    // SORTING
+    // ============================
     function setSort(key, direction) {
       currentSort = { key, direction };
       renderTable();
@@ -325,6 +372,7 @@
     tableHeaders.forEach(th => {
       th.addEventListener('click', () => {
         const key = th.getAttribute('data-sort-key');
+        if (!key) return;
         if (currentSort.key === key) {
           currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
         } else {
@@ -335,9 +383,15 @@
       });
     });
 
-    /* ============================
-       INITIAL RENDER
-       ============================ */
+    // ============================
+    // BUTTON EVENTS
+    // ============================
+    addPlayerBtn.addEventListener('click', addPlayer);
+    addScoreBtn.addEventListener('click', addScore);
+
+    // ============================
+    // INITIAL RENDER
+    // ============================
     renderPlayerSelects();
     renderTable();
     updateCurrentGameTotal();
