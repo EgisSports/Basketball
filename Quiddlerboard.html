@@ -263,7 +263,7 @@ function renderPlayerSelects() {
   if (players.length === 0) {
     playerSelect.innerHTML = "";
     currentPlayersSelect.innerHTML = "";
-    removePlayerSelect.innerHTML = "<option>-- No players --</option>";
+    removePlayerSelect.innerHTML = "<option value='__none__'>-- No players --</option>";
     return;
   }
 
@@ -273,7 +273,11 @@ function renderPlayerSelects() {
 
   playerSelect.innerHTML = options;
   currentPlayersSelect.innerHTML = options;
-  removePlayerSelect.innerHTML = `<option value="">-- Select player --</option>${options}`;
+
+  removePlayerSelect.innerHTML = `
+    <option value="__none__">-- Select player --</option>
+    ${options}
+  `;
 }
 
 function renderTable() {
@@ -322,10 +326,12 @@ function addPlayer() {
 }
 
 function removePlayer() {
-  const idx = Number(removePlayerSelect.value);
-  if (isNaN(idx)) return alert("Select a player.");
+  const val = removePlayerSelect.value;
+  if (val === "__none__") return alert("Select a player.");
 
+  const idx = Number(val);
   const name = players[idx].name;
+
   if (!confirm(`Remove ${name}?`)) return;
 
   players.splice(idx,1);
