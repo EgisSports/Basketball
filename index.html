@@ -15,6 +15,34 @@
     text-align: center;
   }
 
+  /* 🔥 NEW: Navigation Buttons */
+  .nav-switch {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px 0;
+  }
+  .nav-switch button {
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    background: linear-gradient(90deg, #00ffcc, #00bfff);
+    color: #000;
+    box-shadow: 0 0 15px #00ffcc;
+    border: none;
+    transition: 0.3s;
+  }
+  .nav-switch button:hover {
+    box-shadow: 0 0 25px #00ffcc;
+    transform: scale(1.05);
+  }
+  .nav-active {
+    background:#00ffcc !important;
+    color:#000 !important;
+    box-shadow:0 0 25px #00ffcc !important;
+  }
+
   h1 {
     margin: 30px 0 10px;
     font-size: 2.6rem;
@@ -131,6 +159,12 @@
 </head>
 
 <body>
+
+<!-- 🔥 NEW: Navigation Bar -->
+<div class="nav-switch">
+  <button class="nav-active" onclick="window.location.href='Basketball.html'">🏀 Basketball</button>
+  <button onclick="window.location.href='Quiddlerboard.html'">🃏 Quiddlerboard</button>
+</div>
 
 <h1>🏀 Elite Shot Leaderboard</h1>
 
