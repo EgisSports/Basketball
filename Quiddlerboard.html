@@ -5,9 +5,6 @@
 <title>Quiddlerboard</title>
 
 <style>
-  /* ============================
-     GLOBAL NEON THEME (matches Basketball.html)
-     ============================ */
   body {
     font-family: "Orbitron", sans-serif;
     background: radial-gradient(circle at center, #0b1020 0%, #000 100%);
@@ -98,9 +95,6 @@
     min-height: 140px;
   }
 
-  /* ============================
-     NAVIGATION BAR (shared with Basketball.html)
-     ============================ */
   .nav-switch {
     display: flex;
     justify-content: center;
@@ -135,24 +129,17 @@
 
 <body>
 
-<!-- ============================
-     NAVIGATION BAR
-     ============================ -->
 <div class="nav-switch">
-  <button onclick="window.location.href='Basketball.html'">🏀 Basketball</button>
+  <button onclick="window.location.href='https://egissports.github.io/Basketball/'">🏀 Basketball</button>
   <button class="nav-active" onclick="window.location.href='Quiddlerboard.html'">🃏 Quiddlerboard</button>
 </div>
 
 <h1>🃏 Quiddlerboard</h1>
 
-<!-- ============================
-     ALL‑TIME LEADERBOARD
-     ============================ -->
 <div class="section">
   <h2>All‑Time Leaderboard</h2>
 
   <div class="flex-row">
-    <!-- Add Player -->
     <div class="block">
       <h3>Add New Player</h3>
       <label>Player name</label>
@@ -160,7 +147,6 @@
       <button id="addPlayerBtn">Add Player</button>
     </div>
 
-    <!-- Add Score -->
     <div class="block">
       <h3>Add Game Score</h3>
       <label>Player</label>
@@ -172,7 +158,6 @@
       <button id="addScoreBtn">Add Score</button>
     </div>
 
-    <!-- Sort / CSV / Remove -->
     <div class="block">
       <h3>Sort & Data</h3>
       <button id="sortAscBtn">Sort Total Asc</button>
@@ -201,9 +186,6 @@
   </table>
 </div>
 
-<!-- ============================
-     CURRENT GAME MATRIX
-     ============================ -->
 <div class="section">
   <h2>Current Game Tracker (8 Rounds)</h2>
 
@@ -234,9 +216,6 @@
 </div>
 
 <script>
-/* ============================================================
-   LOCAL STORAGE LOAD/SAVE
-   ============================================================ */
 function loadPlayersFromStorage() {
   try {
     const raw = localStorage.getItem("quiddlerPlayers");
@@ -256,9 +235,6 @@ function savePlayers() {
   localStorage.setItem("quiddlerPlayers", JSON.stringify(players));
 }
 
-/* ============================================================
-   DOM ELEMENTS
-   ============================================================ */
 const newPlayerNameInput = document.getElementById("newPlayerName");
 const addPlayerBtn = document.getElementById("addPlayerBtn");
 const playerSelect = document.getElementById("playerSelect");
@@ -281,12 +257,8 @@ const startGameBtn = document.getElementById("startGameBtn");
 const currentGameTableBody = document.querySelector("#currentGameTable tbody");
 
 let currentSort = { key: "name", direction: "asc" };
-
 let currentGame = { players: [] };
 
-/* ============================================================
-   RENDER SELECTS
-   ============================================================ */
 function renderPlayerSelects() {
   if (players.length === 0) {
     playerSelect.innerHTML = "";
@@ -304,21 +276,21 @@ function renderPlayerSelects() {
   removePlayerSelect.innerHTML = `<option value="">-- Select player --</option>${options}`;
 }
 
-/* ============================================================
-   RENDER LEADERBOARD TABLE
-   ============================================================ */
 function renderTable() {
   const sorted = [...players].sort((a,b)=>{
-    let A,B;
-    if (currentSort.key==="name") {
-      A=a.name.toLowerCase(); B=b.name.toLowerCase();
-    } else if (currentSort.key==="games") {
-      A=a.scores.length; B=b.scores.length;
+    if (currentSort.key === "name") {
+      const A = a.name.toLowerCase();
+      const B = b.name.toLowerCase();
+      return currentSort.direction === "asc" ? A.localeCompare(B) : B.localeCompare(A);
+    } else if (currentSort.key === "games") {
+      const A = a.scores.length;
+      const B = b.scores.length;
+      return currentSort.direction === "asc" ? A - B : B - A;
     } else {
-      A=a.scores.reduce((s,n)=>s+n,0);
-      B=b.scores.reduce((s,n)=>s+n,0);
+      const A = a.scores.reduce((s,n)=>s+n,0);
+      const B = b.scores.reduce((s,n)=>s+n,0);
+      return currentSort.direction === "asc" ? A - B : B - A;
     }
-    return currentSort.direction==="asc" ? A-B : B-A;
   });
 
   playersTableBody.innerHTML = sorted.map(p=>{
@@ -335,9 +307,6 @@ function renderTable() {
   }).join("");
 }
 
-/* ============================================================
-   ADD PLAYER
-   ============================================================ */
 function addPlayer() {
   const name = newPlayerNameInput.value.trim();
   if (!name) return alert("Enter a name.");
@@ -352,9 +321,6 @@ function addPlayer() {
   renderTable();
 }
 
-/* ============================================================
-   REMOVE PLAYER
-   ============================================================ */
 function removePlayer() {
   const idx = Number(removePlayerSelect.value);
   if (isNaN(idx)) return alert("Select a player.");
@@ -372,9 +338,6 @@ function removePlayer() {
   renderTable();
 }
 
-/* ============================================================
-   ADD SCORE
-   ============================================================ */
 function addScore() {
   const idx = Number(playerSelect.value);
   const val = Number(scoreInput.value);
@@ -388,9 +351,6 @@ function addScore() {
   renderTable();
 }
 
-/* ============================================================
-   CURRENT GAME TABLE
-   ============================================================ */
 function renderCurrentGameTable() {
   if (currentGame.players.length===0) {
     currentGameTableBody.innerHTML="";
@@ -428,9 +388,6 @@ function handleCurrentGameInput(e) {
   document.querySelector(`tr[data-row="${row}"] .cgTotal`).textContent = total;
 }
 
-/* ============================================================
-   START GAME
-   ============================================================ */
 function startCurrentGame() {
   const selected = [...currentPlayersSelect.selectedOptions];
   if (selected.length===0) return alert("Select players.");
@@ -443,9 +400,6 @@ function startCurrentGame() {
   renderCurrentGameTable();
 }
 
-/* ============================================================
-   SORTING
-   ============================================================ */
 sortAscBtn.onclick = ()=>{ currentSort={key:"total",direction:"asc"}; renderTable(); };
 sortDescBtn.onclick = ()=>{ currentSort={key:"total",direction:"desc"}; renderTable(); };
 
@@ -463,9 +417,6 @@ tableHeaders.forEach(th=>{
   };
 });
 
-/* ============================================================
-   CSV EXPORT / IMPORT
-   ============================================================ */
 function exportCsv() {
   let csv = "name,games,total\n";
   players.forEach(p=>{
@@ -517,9 +468,11 @@ importCsvInput.onchange = e=>{
   reader.readAsText(file);
 };
 
-/* ============================================================
-   INITIAL RENDER
-   ============================================================ */
+addPlayerBtn.onclick = addPlayer;
+addScoreBtn.onclick = addScore;
+removePlayerBtn.onclick = removePlayer;
+startGameBtn.onclick = startCurrentGame;
+
 renderPlayerSelects();
 renderTable();
 renderCurrentGameTable();
