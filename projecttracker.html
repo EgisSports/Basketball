@@ -22,30 +22,23 @@ body {
   align-items: center;
 }
 
-/* FIX: prevent text selection in project tabs */
+/* FIX: NO INPUTS, NO TEXTBOXES */
 .project-tab {
   background: #374151;
   border-radius: 6px;
-  padding: 6px;
+  padding: 8px 10px;
   min-width: 180px;
+  cursor: pointer;
 
   user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
 }
 
 .project-tab.active {
   background: #2563eb;
 }
 
-/* allow input editing but not tab label selection outside input */
-.project-tab input {
-  width: 100%;
-  background: transparent;
-  border: none;
-  color: white;
-  text-align: center;
-  user-select: text;
+.project-tab.editing {
+  background: #1e3a8a;
 }
 
 .new-project-btn,
@@ -59,6 +52,7 @@ body {
 .new-project-btn { background: #10b981; }
 .delete-project-btn { background: #ef4444; }
 
+/* MAIN */
 .container {
   padding: 20px;
 }
@@ -82,6 +76,19 @@ body {
   background: #2b3444;
 }
 
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-label {
+  font-size: 11px;
+  opacity: 0.8;
+  text-transform: uppercase;
+}
+
+/* STATUS COLORS */
 .not-started { background: #2b3444; }
 .in-progress { background: #1e3a8a; }
 .blocked { background: #7f1d1d; }
@@ -111,6 +118,7 @@ textarea {
 /* =========================
    STATUS
 ========================= */
+
 const STATUSES = ["not-started","in-progress","blocked","complete"];
 
 function nextStatus(s) {
@@ -118,196 +126,157 @@ function nextStatus(s) {
 }
 
 /* =========================
-   FULL MUNICIPAL WBS (LOCKED AUTHORITY VERSION)
+   FULL WBS TEMPLATE (RESTORED)
 ========================= */
 
 const phasesTemplate = [
 
 {
   name: "0 - Project Kickoff",
-  sections: [
-    {
-      name: "Initiation & Coordination",
-      tasks: [
-        "Identify client PM and stakeholders",
-        "Internal kickoff meeting (civil/process/structural/electrical)",
-        "Define regulatory triggers (IDNR/IDEM/EPA/MS4)",
-        "Confirm funding source (SRF/ARPA/bonds/capital)",
-        "Review prior studies and master plans",
-        "Establish communication matrix",
-        "Prepare project initiation memo",
-        "Define scope boundaries and exclusions",
-        "Schedule kickoff meeting with client",
-        "Document initial project risks"
-      ]
-    }
-  ]
+  sections: [{
+    name: "Initiation",
+    tasks: [
+      "Identify client PM and stakeholders",
+      "Internal kickoff meeting",
+      "Define scope and constraints",
+      "Confirm funding source",
+      "Review prior studies",
+      "Establish communication matrix",
+      "Document risks"
+    ]
+  }]
 },
 
 {
   name: "1 - Planning & Investigation",
-  sections: [
-    {
-      name: "Data Collection",
-      tasks: [
-        "Collect GIS utility data",
-        "Obtain as-built drawings",
-        "Review O&M manuals and records",
-        "Compile maintenance history",
-        "Contact utility owners (gas/electric/telecom/fiber)",
-        "Request IDEM SSO/CSO records",
-        "Review CIP documents"
-      ]
-    },
-    {
-      name: "Field Investigations",
-      tasks: [
-        "CCTV sewer inspection",
-        "Manhole inspections and defect coding",
-        "Hydrant flow testing coordination",
-        "Valve exercising coordination",
-        "Pump station inspection",
-        "Flow monitoring setup (I/I study)",
-        "Rainfall correlation analysis",
-        "Outfall inspections",
-        "Wet weather field observations"
-      ]
-    },
-    {
-      name: "Hydraulic Modeling",
-      tasks: [
-        "Build SWMM/EPANET model",
-        "Model calibration",
-        "Baseline capacity analysis",
-        "Surcharge/flooding identification",
-        "I/I source analysis",
-        "Scenario development"
-      ]
-    }
-  ]
+  sections: [{
+    name: "Data Collection",
+    tasks: [
+      "Collect GIS utility data",
+      "Obtain as-builts",
+      "Review O&M records",
+      "Contact utility owners",
+      "Review regulatory history",
+      "Field inspection coordination"
+    ]
+  },{
+    name: "Field Investigations",
+    tasks: [
+      "CCTV inspection",
+      "Manhole inspection",
+      "Hydrant flow testing",
+      "Pump station evaluation",
+      "Flow monitoring",
+      "Rainfall correlation",
+      "Outfall inspection"
+    ]
+  },{
+    name: "Hydraulic Modeling",
+    tasks: [
+      "Build SWMM/EPANET model",
+      "Model calibration",
+      "Capacity analysis",
+      "Surcharge identification",
+      "I/I analysis"
+    ]
+  }]
 },
 
 {
-  name: "2 - Preliminary Design (30%)",
-  sections: [
-    {
-      name: "Concept Development",
-      tasks: [
-        "Develop system alternatives",
-        "Evaluate gravity vs pump solutions",
-        "Preliminary alignment selection",
-        "Utility conflict screening",
-        "Constructability review",
-        "Preliminary cost estimating",
-        "Prepare 30% design package"
-      ]
-    },
-    {
-      name: "Equipment Selection",
-      tasks: [
-        "Preliminary pump selection (curves/duty point)",
-        "Vendor outreach for budget pricing",
-        "UV system preliminary sizing (if applicable)",
-        "Blower/aeration evaluation",
-        "Packaged system vendor coordination",
-        "Preliminary equipment layouts"
-      ]
-    }
-  ]
+  name: "2 - Preliminary Design",
+  sections: [{
+    name: "Concept Development",
+    tasks: [
+      "Develop alternatives",
+      "Gravity vs pump evaluation",
+      "Alignment selection",
+      "Utility conflict review",
+      "Cost estimating"
+    ]
+  },{
+    name: "Equipment Selection",
+    tasks: [
+      "Pump selection",
+      "Vendor coordination",
+      "UV system evaluation",
+      "Blower sizing",
+      "Equipment layout"
+    ]
+  }]
 },
 
 {
-  name: "3 - Detailed Design (60–90%)",
-  sections: [
-    {
-      name: "Final Engineering Design",
-      tasks: [
-        "Final plans and profiles",
-        "Pipe material selection",
-        "Manhole design",
-        "Utility conflict resolution",
-        "Erosion control design (NPDES)",
-        "Pump station final design",
-        "Force main surge analysis",
-        "Equipment specifications",
-        "Vendor submittal coordination",
-        "Review shop drawings"
-      ]
-    }
-  ]
+  name: "3 - Detailed Design",
+  sections: [{
+    name: "Final Design",
+    tasks: [
+      "Final plans",
+      "Specifications",
+      "Manhole design",
+      "Pipe selection",
+      "Erosion control",
+      "Pump station design",
+      "Force main design",
+      "Shop drawing review"
+    ]
+  }]
 },
 
 {
   name: "4 - Bid Phase",
-  sections: [
-    {
-      name: "Contract Documents",
-      tasks: [
-        "Final plans/specifications",
-        "Engineer’s Opinion of Cost",
-        "Bid form preparation",
-        "Pre-bid meeting",
-        "Addenda issuance",
-        "Bidder RFI responses",
-        "Bid tabulation"
-      ]
-    }
-  ]
+  sections: [{
+    name: "Bidding",
+    tasks: [
+      "Final bid package",
+      "Advertise project",
+      "Pre-bid meeting",
+      "Answer bidder questions",
+      "Bid tabulation"
+    ]
+  }]
 },
 
 {
   name: "5 - Construction Administration",
-  sections: [
-    {
-      name: "Field Services",
-      tasks: [
-        "Pre-construction meeting",
-        "Submittal review",
-        "RFI responses",
-        "Site visits",
-        "Pay application review",
-        "Change orders",
-        "Construction testing oversight",
-        "Utility coordination",
-        "Progress documentation"
-      ]
-    }
-  ]
+  sections: [{
+    name: "Field Services",
+    tasks: [
+      "Submittals",
+      "RFIs",
+      "Site visits",
+      "Pay apps",
+      "Change orders",
+      "Testing oversight"
+    ]
+  }]
 },
 
 {
   name: "6 - Closeout",
-  sections: [
-    {
-      name: "Acceptance",
-      tasks: [
-        "Punch list",
-        "Final inspection",
-        "Substantial completion",
-        "Final pay application",
-        "Operator training",
-        "O&M manuals",
-        "Warranty closeout"
-      ]
-    }
-  ]
+  sections: [{
+    name: "Finalization",
+    tasks: [
+      "Punch list",
+      "Final inspection",
+      "Substantial completion",
+      "O&M manuals",
+      "Final pay app"
+    ]
+  }]
 },
 
 {
   name: "7 - Record Drawings",
-  sections: [
-    {
-      name: "As-Built Documentation",
-      tasks: [
-        "Contractor redlines",
-        "Field survey verification",
-        "Final as-builts",
-        "GIS updates",
-        "Asset registry updates",
-        "Project archive"
-      ]
-    }
-  ]
+  sections: [{
+    name: "As-Builts",
+    tasks: [
+      "Contractor redlines",
+      "Survey verification",
+      "Final drawings",
+      "GIS updates",
+      "Project archive"
+    ]
+  }]
 }
 
 ];
@@ -326,7 +295,7 @@ function save() {
 }
 
 /* =========================
-   BUILD PROJECT (ALWAYS FULL TEMPLATE)
+   PROJECT BUILD
 ========================= */
 
 function buildProject(name) {
@@ -353,8 +322,12 @@ if (Object.keys(store.projects).length === 0) {
   store.active = id;
 }
 
+if (!store.active) {
+  store.active = Object.keys(store.projects)[0];
+}
+
 /* =========================
-   PROJECT ACTIONS
+   PROJECT MGMT
 ========================= */
 
 function createProject() {
@@ -364,6 +337,7 @@ function createProject() {
   const id = crypto.randomUUID();
   store.projects[id] = buildProject(name);
   store.active = id;
+
   save();
   render();
 }
@@ -376,13 +350,16 @@ function deleteProject() {
 
   delete store.projects[store.active];
   store.active = Object.keys(store.projects)[0] || null;
+
   save();
   render();
 }
 
 /* =========================
-   UI
+   TAB RENDER (NO INPUTS)
 ========================= */
+
+let editId = null;
 
 function renderTabs() {
   const el = document.getElementById("tabs");
@@ -393,20 +370,38 @@ function renderTabs() {
     const tab = document.createElement("div");
     tab.className = "project-tab" + (id === store.active ? " active" : "");
 
-    const input = document.createElement("input");
-    input.value = p.name;
+    if (editId === id) {
+      const input = document.createElement("input");
+      input.value = p.name;
 
-    input.onchange = e => {
-      p.name = e.target.value;
-      save();
-    };
+      input.onblur = () => {
+        p.name = input.value;
+        editId = null;
+        save();
+        render();
+      };
 
-    tab.onclick = () => {
-      store.active = id;
-      render();
-    };
+      input.onkeydown = e => {
+        if (e.key === "Enter") input.blur();
+      };
 
-    tab.appendChild(input);
+      tab.appendChild(input);
+      setTimeout(() => input.focus(), 0);
+
+    } else {
+      tab.innerText = p.name;
+
+      tab.onclick = () => {
+        store.active = id;
+        render();
+      };
+
+      tab.ondblclick = () => {
+        editId = id;
+        render();
+      };
+    }
+
     el.appendChild(tab);
   });
 
@@ -417,12 +412,16 @@ function renderTabs() {
 
   const del = document.createElement("div");
   del.className = "delete-project-btn";
-  del.innerText = "Delete Project";
+  del.innerText = "Delete";
   del.onclick = deleteProject;
 
   el.appendChild(add);
   el.appendChild(del);
 }
+
+/* =========================
+   MAIN RENDER
+========================= */
 
 function render() {
   renderTabs();
@@ -456,20 +455,32 @@ function render() {
           render();
         };
 
+        const header = document.createElement("div");
+        header.className = "task-header";
+
         const name = document.createElement("div");
         name.innerText = task.name;
+
+        const status = document.createElement("div");
+        status.className = "status-label";
+        status.innerText = task.status;
+
+        header.appendChild(name);
+        header.appendChild(status);
 
         const notes = document.createElement("textarea");
         notes.value = task.notes;
 
         notes.onclick = e => e.stopPropagation();
+
         notes.oninput = e => {
           task.notes = e.target.value;
           save();
         };
 
-        t.appendChild(name);
+        t.appendChild(header);
         t.appendChild(notes);
+
         s.appendChild(t);
       });
 
