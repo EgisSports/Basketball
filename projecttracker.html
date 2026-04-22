@@ -12,20 +12,22 @@ body {
   color: #e5e7eb;
 }
 
+/* TOP BAR */
 .topbar {
   display: flex;
   overflow-x: auto;
   background: #0b1220;
   padding: 10px;
   gap: 10px;
+  align-items: center;
 }
 
 .project-tab {
-  padding: 8px;
   background: #374151;
   border-radius: 6px;
-  min-width: 160px;
-  text-align: center;
+  padding: 6px;
+  min-width: 170px;
+  display: flex;
 }
 
 .project-tab.active {
@@ -34,13 +36,23 @@ body {
 
 .project-tab input {
   width: 100%;
-  background: transparent;
   border: none;
+  background: transparent;
   color: white;
   text-align: center;
   font-size: 14px;
 }
 
+.new-project-btn {
+  padding: 8px 12px;
+  background: #10b981;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+/* MAIN */
 .container {
   padding: 20px;
   height: calc(100vh - 50px);
@@ -90,6 +102,7 @@ body {
   text-transform: uppercase;
 }
 
+/* STATUS COLORS */
 .not-started { background: #2b3444; }
 .in-progress { background: #1e3a8a; }
 .blocked { background: #7f1d1d; }
@@ -126,7 +139,7 @@ function nextStatus(s) {
 }
 
 /* =========================
-   MASTER TEMPLATE (LATEST VERSION)
+   FULL MUNICIPAL WBS TEMPLATE (RESTORED + COMPLETE)
 ========================= */
 
 const phasesTemplate = [
@@ -134,46 +147,182 @@ const phasesTemplate = [
   name: "0 - Project Kickoff",
   sections: [
     {
-      name: "Internal Setup",
+      name: "Initiation & Coordination",
       tasks: [
-        "Identify client PM",
-        "Internal discipline kickoff (civil/process/structural)",
-        "Define regulatory triggers (IDNR/IDEM/EPA/MS4)",
-        "Confirm funding source",
-        "Prepare kickoff memo",
+        "Identify client PM and stakeholders",
+        "Internal kickoff (civil, process, structural, electrical)",
+        "Define regulatory triggers (IDNR, IDEM, EPA, MS4)",
+        "Confirm funding source (SRF, ARPA, bond, capital)",
+        "Review prior studies / master plans",
+        "Prepare project initiation memo",
         "Establish communication matrix",
-        "Document risks"
+        "Define scope boundaries and exclusions",
+        "Schedule kickoff meeting",
+        "Document initial project risks"
       ]
     }
   ]
 },
+
 {
   name: "1 - Planning & Investigation",
   sections: [
     {
-      name: "Field Data",
+      name: "Data Collection",
       tasks: [
         "GIS utility compilation",
-        "As-built review",
-        "CCTV inspection",
-        "Manhole inspection",
+        "As-built drawing review",
+        "O&M record review",
+        "Maintenance history review",
+        "Contact utility owners (gas/electric/telecom/fiber)",
+        "Obtain IDEM SSO/CSO records"
+      ]
+    },
+    {
+      name: "Field Investigations",
+      tasks: [
+        "CCTV inspection (sanitary/storm)",
+        "Manhole inspections",
         "Hydrant flow testing",
+        "Valve exercising coordination",
         "Pump station evaluation",
-        "Flow monitoring setup"
+        "Flow monitoring setup (I/I study)",
+        "Rainfall correlation analysis",
+        "Outfall inspections"
+      ]
+    },
+    {
+      name: "Hydraulic Analysis",
+      tasks: [
+        "Build SWMM/EPANET model",
+        "Model calibration",
+        "Baseline capacity analysis",
+        "Surcharge/flooding identification",
+        "Infiltration source evaluation",
+        "Scenario development"
       ]
     }
   ]
 },
+
 {
-  name: "2 - Preliminary Design",
+  name: "2 - Preliminary Design (30%)",
   sections: [
     {
       name: "Concept Development",
       tasks: [
-        "Develop alternatives",
+        "Develop alternatives (repair/replace/upsizing/reroute)",
         "Gravity vs pump evaluation",
-        "Alignment selection",
-        "Utility conflict screening"
+        "Preliminary alignment selection",
+        "Utility conflict screening",
+        "Constructability review",
+        "Preliminary cost estimates",
+        "30% design package preparation"
+      ]
+    },
+    {
+      name: "Equipment Selection",
+      tasks: [
+        "Preliminary pump selection (curves/duty point)",
+        "Contact pump vendors for budget pricing",
+        "UV system preliminary sizing (if applicable)",
+        "Blower/aeration equipment screening",
+        "Evaluate packaged equipment vendors",
+        "Preliminary equipment layout coordination"
+      ]
+    }
+  ]
+},
+
+{
+  name: "3 - Detailed Design",
+  sections: [
+    {
+      name: "Final Engineering Design",
+      tasks: [
+        "Final alignment and grading",
+        "Pipe schedule finalization",
+        "Manhole design details",
+        "Utility conflict resolution",
+        "Erosion control design (NPDES)",
+        "Pump station final design",
+        "Force main surge analysis",
+        "Equipment specifications",
+        "Coordinate vendor submittals",
+        "Review manufacturer drawings"
+      ]
+    }
+  ]
+},
+
+{
+  name: "4 - Bid Phase",
+  sections: [
+    {
+      name: "Contract Documents",
+      tasks: [
+        "Final plans/specifications",
+        "Engineer’s Opinion of Cost",
+        "Bid form preparation",
+        "Pre-bid meeting coordination",
+        "Bid addenda preparation",
+        "Bid RFI responses",
+        "Bid tabulation and recommendation"
+      ]
+    }
+  ]
+},
+
+{
+  name: "5 - Construction Administration",
+  sections: [
+    {
+      name: "Field Administration",
+      tasks: [
+        "Pre-construction meeting",
+        "Submittal review",
+        "RFI tracking",
+        "Site visits",
+        "Pay application review",
+        "Change order evaluation",
+        "Testing oversight",
+        "Utility coordination",
+        "Construction documentation"
+      ]
+    }
+  ]
+},
+
+{
+  name: "6 - Closeout",
+  sections: [
+    {
+      name: "Acceptance",
+      tasks: [
+        "Punch list walkthrough",
+        "Final inspections",
+        "Substantial completion",
+        "Final pay application",
+        "Operator training",
+        "O&M manuals delivery",
+        "Warranty documentation"
+      ]
+    }
+  ]
+},
+
+{
+  name: "7 - Record Drawings",
+  sections: [
+    {
+      name: "As-Builts",
+      tasks: [
+        "Contractor redlines",
+        "Field survey verification",
+        "Final as-built drawings",
+        "GIS updates",
+        "Asset registry updates",
+        "Project archiving"
       ]
     }
   ]
@@ -181,7 +330,7 @@ const phasesTemplate = [
 ];
 
 /* =========================
-   STATE MODEL (FIXED)
+   STATE
 ========================= */
 
 let store = JSON.parse(localStorage.getItem("store")) || {
@@ -195,7 +344,7 @@ function save() {
 }
 
 /* =========================
-   MIGRATION (CRITICAL FIX)
+   CREATE PROJECT
 ========================= */
 
 function createProject(name) {
@@ -217,26 +366,25 @@ function createProject(name) {
     }))
   };
 
-  return id;
+  store.activeProjectId = id;
+  save();
+  render();
 }
 
-/* initialize defaults safely */
+/* init */
 if (!store.projects || Object.keys(store.projects).length === 0) {
   createProject("Phase IIB Sewer Interceptor");
   createProject("Greenbank Pump Station");
-  createProject("Forest Valley Water Main");
-  store.activeProjectId = Object.keys(store.projects)[0];
-  save();
 }
 
-/* ensure active project exists */
-if (!store.activeProjectId || !store.projects[store.activeProjectId]) {
+/* ensure active */
+if (!store.activeProjectId) {
   store.activeProjectId = Object.keys(store.projects)[0];
   save();
 }
 
 /* =========================
-   RENDER TABS (FIXED)
+   RENDER TOP BAR
 ========================= */
 
 function renderTabs() {
@@ -254,6 +402,7 @@ function renderTabs() {
     input.onchange = e => {
       p.name = e.target.value;
       save();
+      render();
     };
 
     tab.onclick = () => {
@@ -265,6 +414,16 @@ function renderTabs() {
     tab.appendChild(input);
     el.appendChild(tab);
   });
+
+  const newBtn = document.createElement("div");
+  newBtn.className = "new-project-btn";
+  newBtn.innerText = "+ New Project";
+  newBtn.onclick = () => {
+    const name = prompt("Project name:");
+    if (name) createProject(name);
+  };
+
+  el.appendChild(newBtn);
 }
 
 /* =========================
