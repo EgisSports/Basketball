@@ -8,15 +8,15 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: #f4f6f9;
+  background: #111827; /* CHARCOAL BASE */
+  color: #e5e7eb;
 }
 
 /* TOP BAR */
 .topbar {
   display: flex;
   overflow-x: auto;
-  background: #111827;
-  color: white;
+  background: #0b1220;
   padding: 10px;
   gap: 10px;
   white-space: nowrap;
@@ -45,13 +45,13 @@ body {
   padding: 6px 10px;
   border-radius: 6px;
   cursor: pointer;
-  background: #e5e7eb;
+  background: #1f2937;
   font-size: 13px;
+  color: #e5e7eb;
 }
 
 .filter-btn.active {
   background: #2563eb;
-  color: white;
 }
 
 /* MAIN */
@@ -62,11 +62,12 @@ body {
 }
 
 .phase {
-  background: white;
+  background: #ffffff;
+  color: #111827;
   margin-bottom: 15px;
   border-radius: 10px;
   padding: 15px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .phase-title {
@@ -75,7 +76,6 @@ body {
   margin-bottom: 10px;
 }
 
-/* SECTION */
 .section {
   border-top: 1px solid #e5e7eb;
   padding-top: 10px;
@@ -105,21 +105,22 @@ body {
 .task-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 10px;
 }
 
 .task-name {
   font-weight: bold;
 }
 
-/* STATUS LABEL */
 .status-label {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: bold;
   text-transform: uppercase;
+  opacity: 0.8;
 }
 
-/* FULL BLOCK COLORS */
+/* STATUS COLORS (HIGH CONTRAST ON WHITE CARDS) */
 .not-started { background: #f3f4f6; }
 .in-progress { background: #dbeafe; }
 .blocked { background: #fee2e2; }
@@ -127,13 +128,15 @@ body {
 
 textarea {
   width: 100%;
-  margin-top: 5px;
-  height: 50px;
+  margin-top: 6px;
+  height: 55px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  padding: 6px;
+  font-family: inherit;
 }
 
-.hidden {
-  display: none;
-}
+.hidden { display: none; }
 </style>
 </head>
 
@@ -143,9 +146,7 @@ textarea {
 
 <div class="container">
   <h2 id="projectTitle"></h2>
-
   <div class="filterbar" id="filters"></div>
-
   <div id="app"></div>
 </div>
 
@@ -169,7 +170,7 @@ function nextStatus(current) {
 let activeFilter = "all";
 
 /* =========================
-   UI STATE (COLLAPSE)
+   UI STATE
 ========================= */
 
 let uiState = JSON.parse(localStorage.getItem("uiState")) || {
@@ -181,7 +182,7 @@ function saveUIState() {
 }
 
 /* =========================
-   EXPANDED ENGINEERING WBS
+   HEAVILY EXPANDED MUNICIPAL WBS
 ========================= */
 
 const phasesTemplate = [
@@ -189,14 +190,18 @@ const phasesTemplate = [
   name: "0 - Project Initiation",
   sections: [
     {
-      name: "Internal & Client Kickoff",
+      name: "Internal Setup & Client Engagement",
       tasks: [
-        "Initial internal scoping discussion",
-        "Define drivers (capacity, condition, compliance)",
-        "Client kickoff meeting",
-        "Funding source identification",
-        "Risk screening (schedule, constructability, utilities)",
-        "Go / No-Go decision"
+        "Identify client PM (City Engineer / Utilities Director / Public Works Supervisor)",
+        "Internal kickoff with discipline leads (civil, process, hydraulic, structural)",
+        "Define regulatory triggers (IDNR, IDEM, EPA CSO/SSO, MS4)",
+        "Request existing master plans and capital improvement plans",
+        "Confirm funding source (SRF / ARPA / bond / local capital)",
+        "Define scope boundaries and exclusions",
+        "Prepare project initiation memo",
+        "Establish communication matrix (who gets copied on what)",
+        "Schedule client kickoff meeting",
+        "Document risks (schedule, utility conflicts, ROW, permitting delays)"
       ]
     }
   ]
@@ -206,42 +211,178 @@ const phasesTemplate = [
   name: "1 - Planning & Investigation",
   sections: [
     {
-      name: "Field & Data Collection",
+      name: "Data Collection & Coordination",
       tasks: [
-        "GIS utility compilation",
-        "As-built drawing review",
-        "CCTV inspection (sanitary defects, I/I)",
-        "Manhole inspection",
-        "Hydrant flow testing",
-        "Pump station evaluation",
-        "Rainfall / flow monitoring",
-        "Water quality sampling"
+        "Request GIS shapefiles from City/County GIS department",
+        "Contact utility coordinators (gas, electric, telecom, fiber)",
+        "Request as-built drawings from city archives",
+        "Contact plant operators for operational issues/history",
+        "Obtain SSO/CSO reports from IDEM (if applicable)",
+        "Review prior engineering studies and feasibility reports",
+        "Compile maintenance logs (cleaning, jetting, repairs)"
       ]
     },
     {
-      name: "Hydraulic Analysis",
+      name: "Field Investigations",
       tasks: [
-        "Develop SWMM / EPANET model",
-        "Calibrate model",
-        "Identify bottlenecks",
-        "Evaluate I/I sources",
-        "Flood risk mapping"
+        "Schedule CCTV contractor (sanitary sewer condition assessment)",
+        "Coordinate traffic control permits with city engineering",
+        "Manhole inspection forms + defect coding (NASSCO PACP if used)",
+        "Hydrant flow testing coordination with fire department",
+        "Valve exercising coordination with utility operations crew",
+        "Pump station field inspection with operator present",
+        "Wet weather flow monitoring deployment (loggers + rain gauge)",
+        "Infiltration source identification during high groundwater events",
+        "Stormwater outfall inspections"
+      ]
+    },
+    {
+      name: "Hydraulic Modeling & Analysis",
+      tasks: [
+        "Build baseline SWMM model (sanitary + storm as applicable)",
+        "Import GIS network geometry into model",
+        "Calibrate model using flow monitoring data",
+        "Define design storm events (5yr / 10yr / 25yr / 100yr)",
+        "Identify surcharge and flooding nodes",
+        "Evaluate downstream capacity constraints",
+        "Document assumptions in modeling memo",
+        "Prepare alternatives modeling scenarios"
       ]
     }
   ]
 },
 
 {
-  name: "2 - Preliminary Design",
+  name: "2 - Preliminary Design (30%)",
   sections: [
     {
-      name: "Concept Development",
+      name: "Concept Development & Alternatives",
       tasks: [
-        "Develop alternatives",
-        "Evaluate gravity vs pumped systems",
-        "Preliminary alignment selection",
-        "Utility conflict screening",
-        "Preliminary constructability review"
+        "Develop at least 2–3 alternatives (repair / replace / reroute)",
+        "Prepare conceptual exhibits for each alternative",
+        "Evaluate constructability (bypass pumping, staging, access)",
+        "Identify easement requirements early",
+        "Coordinate with property owners if known conflicts exist",
+        "Develop preliminary opinion of cost per alternative",
+        "Prepare 30% design narrative report"
+      ]
+    },
+    {
+      name: "Preliminary Engineering Deliverables",
+      tasks: [
+        "Develop preliminary plan & profile sheets",
+        "Define preliminary pipe sizes and slopes",
+        "Establish preliminary HGL / EGL (hydraulic grade line)",
+        "Pump station preliminary sizing (if applicable)",
+        "Force main preliminary routing (if applicable)",
+        "Draft erosion control concept (NPDES considerations)",
+        "Submit 30% design package to client for review"
+      ]
+    }
+  ]
+},
+
+{
+  name: "3 - Detailed Design",
+  sections: [
+    {
+      name: "Final Design Development",
+      tasks: [
+        "Finalize alignment and grading design",
+        "Finalize manhole spacing and structure types",
+        "Prepare detailed pipe schedules",
+        "Finalize utility conflict resolution",
+        "Coordinate relocations with utility owners",
+        "Prepare full construction plan set (60–90%)",
+        "Develop technical specifications (CSI format)",
+        "Finalize erosion & sediment control plan"
+      ]
+    },
+    {
+      name: "Permitting Coordination",
+      tasks: [
+        "Submit IDEM construction permit (if applicable)",
+        "Coordinate Section 401/404 wetlands permitting",
+        "Coordinate railroad crossing permits",
+        "Submit MS4 permit compliance documentation",
+        "Respond to regulatory review comments",
+        "Maintain permitting log with status tracking"
+      ]
+    }
+  ]
+},
+
+{
+  name: "4 - Bid Phase",
+  sections: [
+    {
+      name: "Contract Documents & Bidding",
+      tasks: [
+        "Finalize contract drawings and technical specs",
+        "Prepare engineer’s opinion of cost (EOC)",
+        "Coordinate legal review of contract documents",
+        "Prepare bid form and bid schedule",
+        "Issue addenda during bidding period",
+        "Conduct pre-bid meeting with contractors",
+        "Respond to bidder RFIs",
+        "Assist in bid tabulation and award recommendation"
+      ]
+    }
+  ]
+},
+
+{
+  name: "5 - Construction Administration",
+  sections: [
+    {
+      name: "Field & Office Administration",
+      tasks: [
+        "Conduct pre-construction meeting",
+        "Review contractor submittals and shop drawings",
+        "Maintain RFI log and response tracking",
+        "Perform construction observation/site visits",
+        "Review pay applications (quantities + progress)",
+        "Evaluate change orders (scope + cost justification)",
+        "Coordinate utility conflicts during construction",
+        "Review testing reports (pressure, compaction, leakage)",
+        "Maintain construction photo documentation"
+      ]
+    }
+  ]
+},
+
+{
+  name: "6 - Closeout",
+  sections: [
+    {
+      name: "Acceptance & Handover",
+      tasks: [
+        "Develop punch list with owner",
+        "Verify corrections completed",
+        "Final walkthrough with City/Owner",
+        "Substantial completion certification",
+        "Final pay application approval",
+        "Operator training session",
+        "Deliver O&M manuals and warranties",
+        "Prepare closeout report"
+      ]
+    }
+  ]
+},
+
+{
+  name: "7 - Record Drawings",
+  sections: [
+    {
+      name: "As-Built & Asset Management",
+      tasks: [
+        "Collect contractor redlines",
+        "Perform field survey verification",
+        "Update plan sheets with as-built conditions",
+        "Update GIS asset database",
+        "Assign asset IDs (manholes, pipes, valves)",
+        "Submit final record drawings to City",
+        "Archive project documentation"
       ]
     }
   ]
@@ -252,9 +393,7 @@ const phasesTemplate = [
    PROJECT STATE
 ========================= */
 
-const projectNames = [
-"Project 1","Project 2","Project 3","Project 4"
-];
+const projectNames = ["Project 1","Project 2","Project 3","Project 4"];
 
 let projects = JSON.parse(localStorage.getItem("projects")) || {};
 let currentProject = projectNames[0];
@@ -349,16 +488,15 @@ function render() {
       const key = `${currentProject}-${pIndex}-${sIndex}`;
 
       const secDiv = document.createElement("div");
-      secDiv.className = "section";
 
       const secTitle = document.createElement("div");
       secTitle.className = "section-title";
 
-      const isCollapsed = uiState.collapsed[key];
+      const collapsed = uiState.collapsed[key];
 
       secTitle.innerHTML = `
         <span>${section.name}</span>
-        <span>${isCollapsed ? "▸" : "▾"}</span>
+        <span>${collapsed ? "▸" : "▾"}</span>
       `;
 
       secTitle.onclick = () => {
@@ -369,7 +507,7 @@ function render() {
 
       secDiv.appendChild(secTitle);
 
-      if (!isCollapsed) {
+      if (!collapsed) {
 
         section.tasks
           .filter(t => activeFilter === "all" || t.status === activeFilter)
@@ -393,14 +531,14 @@ function render() {
 
           const status = document.createElement("div");
           status.className = "status-label";
-          status.innerText = task.status.replace("-", " ");
+          status.innerText = task.status;
 
           header.appendChild(name);
           header.appendChild(status);
 
           const notes = document.createElement("textarea");
           notes.value = task.notes;
-          notes.placeholder = "Notes / updates...";
+          notes.placeholder = "Notes / decisions / coordination updates...";
           notes.onclick = e => e.stopPropagation();
           notes.oninput = e => {
             task.notes = e.target.value;
