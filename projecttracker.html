@@ -12,55 +12,74 @@ body {
   color: #e5e7eb;
 }
 
+/* TOP BAR */
 .topbar {
   display: flex;
+  overflow-x: auto;
   background: #0b1220;
   padding: 10px;
   gap: 10px;
+  align-items: center;
 }
 
+/* FIX: prevent text selection in project tabs */
 .project-tab {
   background: #374151;
   border-radius: 6px;
   padding: 6px;
   min-width: 180px;
+
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
 }
 
-.project-tab.active { background: #2563eb; }
+.project-tab.active {
+  background: #2563eb;
+}
 
+/* allow input editing but not tab label selection outside input */
 .project-tab input {
   width: 100%;
   background: transparent;
   border: none;
   color: white;
   text-align: center;
+  user-select: text;
 }
 
-.new-project-btn, .delete-project-btn {
-  padding: 8px;
-  cursor: pointer;
+.new-project-btn,
+.delete-project-btn {
+  padding: 8px 10px;
   border-radius: 6px;
+  cursor: pointer;
   font-weight: bold;
 }
+
 .new-project-btn { background: #10b981; }
 .delete-project-btn { background: #ef4444; }
 
-.container { padding: 20px; }
+.container {
+  padding: 20px;
+}
 
 .phase {
   background: #1f2937;
-  padding: 15px;
   margin-bottom: 15px;
+  padding: 15px;
   border-radius: 10px;
 }
 
-.section { margin-top: 10px; }
+.section {
+  margin-top: 10px;
+}
 
 .task {
   margin-top: 8px;
   padding: 10px;
   border-radius: 8px;
   cursor: pointer;
+  background: #2b3444;
 }
 
 .not-started { background: #2b3444; }
@@ -73,6 +92,7 @@ textarea {
   margin-top: 5px;
   background: #111827;
   color: white;
+  border: 1px solid #374151;
 }
 </style>
 </head>
@@ -89,135 +109,230 @@ textarea {
 <script>
 
 /* =========================
-   VERSIONING
+   STATUS
 ========================= */
-const TEMPLATE_VERSION = 2;
+const STATUSES = ["not-started","in-progress","blocked","complete"];
+
+function nextStatus(s) {
+  return STATUSES[(STATUSES.indexOf(s)+1)%STATUSES.length];
+}
 
 /* =========================
-   MASTER TEMPLATE (FULL)
+   FULL MUNICIPAL WBS (LOCKED AUTHORITY VERSION)
 ========================= */
+
 const phasesTemplate = [
+
 {
   name: "0 - Project Kickoff",
   sections: [
     {
-      name: "Initiation",
+      name: "Initiation & Coordination",
       tasks: [
-        "Client contact",
-        "Internal kickoff",
-        "Define scope",
-        "Confirm funding",
-        "Review prior studies"
+        "Identify client PM and stakeholders",
+        "Internal kickoff meeting (civil/process/structural/electrical)",
+        "Define regulatory triggers (IDNR/IDEM/EPA/MS4)",
+        "Confirm funding source (SRF/ARPA/bonds/capital)",
+        "Review prior studies and master plans",
+        "Establish communication matrix",
+        "Prepare project initiation memo",
+        "Define scope boundaries and exclusions",
+        "Schedule kickoff meeting with client",
+        "Document initial project risks"
       ]
     }
   ]
 },
+
 {
   name: "1 - Planning & Investigation",
   sections: [
     {
       name: "Data Collection",
       tasks: [
-        "Collect GIS",
-        "Review as-builts",
-        "Field inspection",
-        "Hydraulic modeling"
+        "Collect GIS utility data",
+        "Obtain as-built drawings",
+        "Review O&M manuals and records",
+        "Compile maintenance history",
+        "Contact utility owners (gas/electric/telecom/fiber)",
+        "Request IDEM SSO/CSO records",
+        "Review CIP documents"
+      ]
+    },
+    {
+      name: "Field Investigations",
+      tasks: [
+        "CCTV sewer inspection",
+        "Manhole inspections and defect coding",
+        "Hydrant flow testing coordination",
+        "Valve exercising coordination",
+        "Pump station inspection",
+        "Flow monitoring setup (I/I study)",
+        "Rainfall correlation analysis",
+        "Outfall inspections",
+        "Wet weather field observations"
+      ]
+    },
+    {
+      name: "Hydraulic Modeling",
+      tasks: [
+        "Build SWMM/EPANET model",
+        "Model calibration",
+        "Baseline capacity analysis",
+        "Surcharge/flooding identification",
+        "I/I source analysis",
+        "Scenario development"
       ]
     }
   ]
 },
+
 {
-  name: "2 - Preliminary Design",
+  name: "2 - Preliminary Design (30%)",
   sections: [
     {
-      name: "Concept",
+      name: "Concept Development",
       tasks: [
-        "Develop alternatives",
-        "Alignment selection",
-        "Cost estimate"
+        "Develop system alternatives",
+        "Evaluate gravity vs pump solutions",
+        "Preliminary alignment selection",
+        "Utility conflict screening",
+        "Constructability review",
+        "Preliminary cost estimating",
+        "Prepare 30% design package"
+      ]
+    },
+    {
+      name: "Equipment Selection",
+      tasks: [
+        "Preliminary pump selection (curves/duty point)",
+        "Vendor outreach for budget pricing",
+        "UV system preliminary sizing (if applicable)",
+        "Blower/aeration evaluation",
+        "Packaged system vendor coordination",
+        "Preliminary equipment layouts"
       ]
     }
   ]
 },
+
 {
-  name: "3 - Detailed Design",
+  name: "3 - Detailed Design (60–90%)",
   sections: [
     {
-      name: "Engineering",
+      name: "Final Engineering Design",
       tasks: [
-        "Final plans",
-        "Specs",
-        "Permitting"
+        "Final plans and profiles",
+        "Pipe material selection",
+        "Manhole design",
+        "Utility conflict resolution",
+        "Erosion control design (NPDES)",
+        "Pump station final design",
+        "Force main surge analysis",
+        "Equipment specifications",
+        "Vendor submittal coordination",
+        "Review shop drawings"
       ]
     }
   ]
 },
+
 {
-  name: "4 - Bid",
+  name: "4 - Bid Phase",
   sections: [
     {
-      name: "Bidding",
+      name: "Contract Documents",
       tasks: [
-        "Advertise",
+        "Final plans/specifications",
+        "Engineer’s Opinion of Cost",
+        "Bid form preparation",
         "Pre-bid meeting",
+        "Addenda issuance",
+        "Bidder RFI responses",
         "Bid tabulation"
       ]
     }
   ]
 },
+
 {
-  name: "5 - Construction",
+  name: "5 - Construction Administration",
   sections: [
     {
-      name: "CA",
+      name: "Field Services",
       tasks: [
-        "Submittals",
-        "RFIs",
-        "Pay apps"
+        "Pre-construction meeting",
+        "Submittal review",
+        "RFI responses",
+        "Site visits",
+        "Pay application review",
+        "Change orders",
+        "Construction testing oversight",
+        "Utility coordination",
+        "Progress documentation"
       ]
     }
   ]
 },
+
 {
   name: "6 - Closeout",
   sections: [
     {
-      name: "Final",
+      name: "Acceptance",
       tasks: [
         "Punch list",
-        "Final pay",
-        "O&M"
+        "Final inspection",
+        "Substantial completion",
+        "Final pay application",
+        "Operator training",
+        "O&M manuals",
+        "Warranty closeout"
       ]
     }
   ]
 },
+
 {
   name: "7 - Record Drawings",
   sections: [
     {
-      name: "As-Built",
+      name: "As-Built Documentation",
       tasks: [
-        "Redlines",
-        "Final drawings"
+        "Contractor redlines",
+        "Field survey verification",
+        "Final as-builts",
+        "GIS updates",
+        "Asset registry updates",
+        "Project archive"
       ]
     }
   ]
 }
+
 ];
 
 /* =========================
-   UTIL
+   STATE
 ========================= */
 
-function deepClone(obj) {
-  return JSON.parse(JSON.stringify(obj));
+let store = JSON.parse(localStorage.getItem("store")) || {
+  projects: {},
+  active: null
+};
+
+function save() {
+  localStorage.setItem("store", JSON.stringify(store));
 }
 
-function buildProjectFromTemplate(name) {
+/* =========================
+   BUILD PROJECT (ALWAYS FULL TEMPLATE)
+========================= */
+
+function buildProject(name) {
   return {
     name,
-    version: TEMPLATE_VERSION,
-    phases: deepClone(phasesTemplate).map(p => ({
+    phases: structuredClone(phasesTemplate).map(p => ({
       ...p,
       sections: p.sections.map(s => ({
         ...s,
@@ -231,64 +346,23 @@ function buildProjectFromTemplate(name) {
   };
 }
 
-/* =========================
-   MIGRATION
-========================= */
-
-function migrateProject(project) {
-  if (!project.version || project.version < TEMPLATE_VERSION) {
-
-    const fresh = buildProjectFromTemplate(project.name);
-
-    // merge statuses where names match
-    fresh.phases.forEach((phase, pi) => {
-      const oldPhase = project.phases[pi];
-      if (!oldPhase) return;
-
-      phase.sections.forEach((sec, si) => {
-        const oldSec = oldPhase.sections[si];
-        if (!oldSec) return;
-
-        sec.tasks.forEach(task => {
-          const match = oldSec.tasks.find(t => t.name === task.name);
-          if (match) {
-            task.status = match.status;
-            task.notes = match.notes;
-          }
-        });
-      });
-    });
-
-    return fresh;
-  }
-  return project;
-}
-
-/* =========================
-   STATE
-========================= */
-
-let store = JSON.parse(localStorage.getItem("store")) || {
-  projects: {},
-  active: null
-};
-
-/* MIGRATE ALL PROJECTS */
-Object.keys(store.projects).forEach(k => {
-  store.projects[k] = migrateProject(store.projects[k]);
-});
-
-function save() {
-  localStorage.setItem("store", JSON.stringify(store));
-}
-
-/* =========================
-   PROJECT MGMT
-========================= */
-
-function createProject(name) {
+/* INIT */
+if (Object.keys(store.projects).length === 0) {
   const id = crypto.randomUUID();
-  store.projects[id] = buildProjectFromTemplate(name);
+  store.projects[id] = buildProject("New Project");
+  store.active = id;
+}
+
+/* =========================
+   PROJECT ACTIONS
+========================= */
+
+function createProject() {
+  const name = prompt("Project name:");
+  if (!name) return;
+
+  const id = crypto.randomUUID();
+  store.projects[id] = buildProject(name);
   store.active = id;
   save();
   render();
@@ -296,21 +370,14 @@ function createProject(name) {
 
 function deleteProject() {
   const p = store.projects[store.active];
+  if (!p) return;
+
   if (!confirm(`Delete "${p.name}"?`)) return;
 
   delete store.projects[store.active];
   store.active = Object.keys(store.projects)[0] || null;
   save();
   render();
-}
-
-/* INIT */
-if (Object.keys(store.projects).length === 0) {
-  createProject("New Project");
-}
-
-if (!store.active) {
-  store.active = Object.keys(store.projects)[0];
 }
 
 /* =========================
@@ -322,12 +389,13 @@ function renderTabs() {
   el.innerHTML = "";
 
   Object.entries(store.projects).forEach(([id,p]) => {
+
     const tab = document.createElement("div");
     tab.className = "project-tab" + (id === store.active ? " active" : "");
 
     const input = document.createElement("input");
     input.value = p.name;
-    input.onclick = e => e.stopPropagation();
+
     input.onchange = e => {
       p.name = e.target.value;
       save();
@@ -344,15 +412,12 @@ function renderTabs() {
 
   const add = document.createElement("div");
   add.className = "new-project-btn";
-  add.innerText = "+ New";
-  add.onclick = () => {
-    const name = prompt("Project name:");
-    if (name) createProject(name);
-  };
+  add.innerText = "+ New Project";
+  add.onclick = createProject;
 
   const del = document.createElement("div");
   del.className = "delete-project-btn";
-  del.innerText = "Delete";
+  del.innerText = "Delete Project";
   del.onclick = deleteProject;
 
   el.appendChild(add);
@@ -362,17 +427,16 @@ function renderTabs() {
 function render() {
   renderTabs();
 
-  const p = store.projects[store.active];
-  document.getElementById("title").innerText = p.name;
+  const project = store.projects[store.active];
+  document.getElementById("title").innerText = project.name;
 
   const app = document.getElementById("app");
   app.innerHTML = "";
 
-  p.phases.forEach(phase => {
+  project.phases.forEach(phase => {
 
     const ph = document.createElement("div");
     ph.className = "phase";
-
     ph.innerHTML = `<b>${phase.name}</b>`;
 
     phase.sections.forEach(sec => {
@@ -387,8 +451,7 @@ function render() {
         t.className = "task " + task.status;
 
         t.onclick = () => {
-          const order = ["not-started","in-progress","blocked","complete"];
-          task.status = order[(order.indexOf(task.status)+1)%4];
+          task.status = nextStatus(task.status);
           save();
           render();
         };
@@ -398,6 +461,7 @@ function render() {
 
         const notes = document.createElement("textarea");
         notes.value = task.notes;
+
         notes.onclick = e => e.stopPropagation();
         notes.oninput = e => {
           task.notes = e.target.value;
