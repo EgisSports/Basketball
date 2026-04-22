@@ -65,8 +65,7 @@ body {
 
 /* PHASE CARD */
 .phase {
-  background: #1f2937; /* slightly lighter than page */
-  color: #e5e7eb;
+  background: #1f2937;
   margin-bottom: 15px;
   border-radius: 10px;
   padding: 15px;
@@ -100,6 +99,7 @@ body {
   border-radius: 10px;
   cursor: pointer;
   transition: 0.15s ease;
+  background: #2b3444; /* LIGHTER TILE */
 }
 
 .task:hover {
@@ -125,7 +125,7 @@ body {
 }
 
 /* STATUS COLORS */
-.not-started { background: #2a2f3a; }
+.not-started { background: #2b3444; }
 .in-progress { background: #1e3a8a; }
 .blocked { background: #7f1d1d; }
 .complete { background: #064e3b; }
@@ -188,7 +188,7 @@ function saveUIState() {
 }
 
 /* =========================
-   PROJECT NAMES (editable)
+   PROJECTS
 ========================= */
 
 let projectNames = JSON.parse(localStorage.getItem("projectNames")) || [
@@ -200,7 +200,7 @@ function saveProjectNames() {
 }
 
 /* =========================
-   EXPANDED WBS (UPDATED LABEL)
+   EXPANDED MUNICIPAL WBS
 ========================= */
 
 const phasesTemplate = [
@@ -210,16 +210,14 @@ const phasesTemplate = [
     {
       name: "Internal Setup & Client Engagement",
       tasks: [
-        "Identify client PM (City Engineer / Utilities Director / Public Works Supervisor)",
-        "Internal kickoff with discipline leads (civil, process, hydraulic)",
+        "Identify client PM (City Engineer / Utilities Director)",
+        "Internal discipline kickoff (civil, process, structural, electrical)",
         "Define regulatory triggers (IDNR, IDEM, EPA, MS4)",
-        "Request existing master plans and CIP documents",
-        "Confirm funding source (SRF / ARPA / bond / capital budget)",
-        "Define scope boundaries and exclusions",
+        "Confirm funding source (SRF / ARPA / capital budget)",
         "Prepare project initiation memo",
-        "Establish communication matrix (distribution list)",
-        "Schedule kickoff meeting with client",
-        "Document project risks (utility conflicts, ROW, permitting delays)"
+        "Establish communication matrix",
+        "Schedule kickoff meeting",
+        "Document project risks"
       ]
     }
   ]
@@ -231,26 +229,63 @@ const phasesTemplate = [
     {
       name: "Field & Data Collection",
       tasks: [
-        "Request GIS data from City/County GIS department",
-        "Contact utility locators (gas/electric/telecom/fiber)",
-        "Retrieve as-built drawings from archives",
-        "Contact plant operators for system history",
-        "Obtain IDEM SSO/CSO records (if applicable)",
-        "Review maintenance logs (jetting, repairs, failures)"
+        "GIS utility compilation",
+        "As-built drawing review",
+        "CCTV inspection (sanitary sewer)",
+        "Manhole inspection & defect coding",
+        "Hydrant flow testing",
+        "Pump station field evaluation",
+        "Flow monitoring / I&I study setup",
+        "Wet weather observation"
+      ]
+    }
+  ]
+},
+
+{
+  name: "2 - Preliminary Design",
+  sections: [
+    {
+      name: "Concept Development",
+      tasks: [
+        "Develop system alternatives",
+        "Evaluate gravity vs pump solutions",
+        "Preliminary alignment selection",
+        "Utility conflict screening",
+        "Constructability review"
       ]
     },
     {
-      name: "Field Investigations",
+      name: "Equipment & Process Selection",
       tasks: [
-        "Schedule CCTV inspection contractor",
-        "Traffic control permitting coordination",
-        "Manhole inspection + defect coding",
-        "Hydrant flow testing coordination with fire department",
-        "Valve exercising coordination with utility crew",
-        "Pump station inspection with operator",
-        "Flow monitoring deployment (I/I study)",
-        "Wet weather infiltration observation",
-        "Stormwater outfall inspections"
+        "Preliminary pump selection (duty point, curves)",
+        "Evaluate vendor pump options",
+        "UV disinfection system preliminary sizing (if applicable)",
+        "Blower/aeration equipment screening (if applicable)",
+        "Review packaged equipment vendors",
+        "Coordinate with manufacturer reps for budget pricing",
+        "Preliminary equipment layout coordination"
+      ]
+    }
+  ]
+},
+
+{
+  name: "3 - Detailed Design",
+  sections: [
+    {
+      name: "Final Engineering Design",
+      tasks: [
+        "Finalize alignment and grading",
+        "Manhole structure design",
+        "Pipe schedule finalization",
+        "Utility conflict resolution",
+        "Erosion control design",
+        "Pump station final design",
+        "Force main analysis (if applicable)",
+        "Equipment specification development",
+        "Coordinate final vendor submittals (pumps/UV/blowers)",
+        "Review manufacturer drawings for compliance"
       ]
     }
   ]
@@ -305,7 +340,7 @@ function renderFilters() {
 }
 
 /* =========================
-   PROJECT TABS (EDITABLE)
+   TABS
 ========================= */
 
 function renderTabs() {
@@ -324,9 +359,6 @@ function renderTabs() {
     input.style.border = "none";
     input.style.color = "white";
     input.style.textAlign = "center";
-    input.style.fontSize = "14px";
-
-    input.onfocus = () => div.classList.add("active");
 
     input.onchange = (e) => {
       projectNames[index] = e.target.value;
@@ -422,7 +454,6 @@ function render() {
 
           const notes = document.createElement("textarea");
           notes.value = task.notes;
-          notes.placeholder = "Notes / coordination / decisions...";
           notes.onclick = e => e.stopPropagation();
           notes.oninput = e => {
             task.notes = e.target.value;
