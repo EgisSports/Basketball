@@ -83,24 +83,35 @@ body {
   font-weight: bold;
 }
 
+/* TASK */
 .task {
   margin-top: 10px;
   padding: 12px;
   border-radius: 10px;
-  cursor: pointer;
   background: #2b3444;
 }
 
 .task-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
-.status-label {
+.task-name {
+  font-weight: bold;
+}
+
+/* STATUS BUTTON */
+.status-btn {
+  padding: 4px 8px;
+  border-radius: 6px;
   font-size: 11px;
-  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  font-weight: bold;
 }
 
+/* STATUS COLORS */
 .not-started { background: #2b3444; }
 .in-progress { background: #1e3a8a; }
 .blocked { background: #7f1d1d; }
@@ -127,6 +138,10 @@ textarea {
 
 <script>
 
+/* =========================
+   STATUS
+========================= */
+
 const STATUSES = ["not-started","in-progress","blocked","complete"];
 
 function nextStatus(s) {
@@ -134,7 +149,7 @@ function nextStatus(s) {
 }
 
 /* =========================
-   TEMPLATE (FULL)
+   FULL WBS TEMPLATE
 ========================= */
 
 const phasesTemplate = [
@@ -144,13 +159,48 @@ const phasesTemplate = [
     {
       name: "Initiation & Coordination",
       tasks: [
-        "Identify client PM",
-        "Internal kickoff",
+        "Identify client PM and stakeholders",
+        "Internal kickoff meeting",
         "Define regulatory triggers",
         "Confirm funding source",
         "Prepare kickoff memo",
         "Establish communication matrix",
         "Document risks"
+      ]
+    }
+  ]
+},
+{
+  name: "1 - Planning & Investigation",
+  sections: [
+    {
+      name: "Data Collection",
+      tasks: [
+        "Collect GIS utility data",
+        "Review as-builts",
+        "Compile O&M records",
+        "Contact utility owners"
+      ]
+    }
+  ]
+},
+{
+  name: "2 - Preliminary Design",
+  sections: [
+    {
+      name: "Concept Development",
+      tasks: [
+        "Develop alternatives",
+        "Evaluate gravity vs pump",
+        "Alignment selection"
+      ]
+    },
+    {
+      name: "Equipment Selection",
+      tasks: [
+        "Preliminary pump selection",
+        "Vendor coordination",
+        "UV system sizing"
       ]
     }
   ]
@@ -298,32 +348,31 @@ function render() {
         const div = document.createElement("div");
         div.className = "task " + task.status;
 
-        div.onclick = () => {
+        const header = document.createElement("div");
+        header.className = "task-header";
+
+        const name = document.createElement("div");
+        name.className = "task-name";
+        name.innerText = task.name;
+
+        const btn = document.createElement("button");
+        btn.className = "status-btn";
+        btn.innerText = task.status;
+
+        btn.onclick = (e) => {
+          e.stopPropagation();
           task.status = nextStatus(task.status);
           save();
           render();
         };
 
-        const header = document.createElement("div");
-        header.className = "task-header";
-
-        const name = document.createElement("div");
-        name.innerText = task.name;
-
-        const status = document.createElement("div");
-        status.className = "status-label";
-        status.innerText = task.status;
-
         header.appendChild(name);
-        header.appendChild(status);
+        header.appendChild(btn);
 
         const notes = document.createElement("textarea");
         notes.value = task.notes;
 
-        /* CRITICAL FIX */
         notes.onclick = e => e.stopPropagation();
-        notes.onfocus = e => e.stopPropagation();
-
         notes.oninput = e => {
           task.notes = e.target.value;
           save();
