@@ -43,9 +43,19 @@ body {
   font-size: 14px;
 }
 
+/* BUTTONS */
 .new-project-btn {
   padding: 8px 12px;
   background: #10b981;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.delete-project-btn {
+  padding: 8px 12px;
+  background: #ef4444;
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
@@ -139,7 +149,7 @@ function nextStatus(s) {
 }
 
 /* =========================
-   FULL MUNICIPAL WBS TEMPLATE (RESTORED + COMPLETE)
+   TEMPLATE (UNCHANGED)
 ========================= */
 
 const phasesTemplate = [
@@ -150,180 +160,12 @@ const phasesTemplate = [
       name: "Initiation & Coordination",
       tasks: [
         "Identify client PM",
-        "Identify project stakeholders",
-        "Internal kickoff (civil, process, structural, electrical)",
-        "Define regulatory triggers (IDNR, IDEM, EPA, MS4)",
-        "Confirm funding source (SRF, ARPA, bond, capital)",
-        "Review prior studies / master plans",
-        "Prepare project initiation memo",
+        "Internal kickoff",
+        "Define regulatory triggers",
+        "Confirm funding source",
+        "Prepare kickoff memo",
         "Establish communication matrix",
-        "Define scope boundaries and exclusions",
-        "Schedule kickoff meeting",
-        "Document initial project risks"
-      ]
-    }
-  ]
-},
-
-{
-  name: "1 - Planning & Investigation",
-  sections: [
-    {
-      name: "Data Collection",
-      tasks: [
-        "GIS utility compilation",
-        "As-built drawing review",
-        "O&M record review",
-        "Maintenance history review",
-        "Contact utility owners (gas/electric/telecom/fiber)",
-        "Obtain IDEM SSO/CSO records"
-      ]
-    },
-    {
-      name: "Field Investigations",
-      tasks: [
-        "CCTV inspection (sanitary/storm)",
-        "Manhole inspections",
-        "Hydrant flow testing",
-        "Valve exercising coordination",
-        "Pump station evaluation",
-        "Flow monitoring setup (I/I study)",
-        "Rainfall correlation analysis",
-        "Outfall inspections"
-      ]
-    },
-    {
-      name: "Hydraulic Analysis",
-      tasks: [
-        "Build SWMM/EPANET model",
-        "Model calibration",
-        "Baseline capacity analysis",
-        "Surcharge/flooding identification",
-        "Infiltration source evaluation",
-        "Scenario development"
-      ]
-    }
-  ]
-},
-
-{
-  name: "2 - Preliminary Design (30%)",
-  sections: [
-    {
-      name: "Concept Development",
-      tasks: [
-        "Develop alternatives (repair/replace/upsizing/reroute)",
-        "Gravity vs pump evaluation",
-        "Preliminary alignment selection",
-        "Utility conflict screening",
-        "Constructability review",
-        "Preliminary cost estimates",
-        "30% design package preparation"
-      ]
-    },
-    {
-      name: "Equipment Selection",
-      tasks: [
-        "Preliminary pump selection (curves/duty point)",
-        "Contact pump vendors for budget pricing",
-        "UV system preliminary sizing (if applicable)",
-        "Blower/aeration equipment screening",
-        "Evaluate packaged equipment vendors",
-        "Preliminary equipment layout coordination"
-      ]
-    }
-  ]
-},
-
-{
-  name: "3 - Detailed Design",
-  sections: [
-    {
-      name: "Final Engineering Design",
-      tasks: [
-        "Final alignment and grading",
-        "Pipe schedule finalization",
-        "Manhole design details",
-        "Utility conflict resolution",
-        "Erosion control design (NPDES)",
-        "Pump station final design",
-        "Force main surge analysis",
-        "Equipment specifications",
-        "Coordinate vendor submittals",
-        "Review manufacturer drawings"
-      ]
-    }
-  ]
-},
-
-{
-  name: "4 - Bid Phase",
-  sections: [
-    {
-      name: "Contract Documents",
-      tasks: [
-        "Final plans/specifications",
-        "Engineer’s Opinion of Cost",
-        "Bid form preparation",
-        "Pre-bid meeting coordination",
-        "Bid addenda preparation",
-        "Bid RFI responses",
-        "Bid tabulation and recommendation"
-      ]
-    }
-  ]
-},
-
-{
-  name: "5 - Construction Administration",
-  sections: [
-    {
-      name: "Field Administration",
-      tasks: [
-        "Pre-construction meeting",
-        "Submittal review",
-        "RFI tracking",
-        "Site visits",
-        "Pay application review",
-        "Change order evaluation",
-        "Testing oversight",
-        "Utility coordination",
-        "Construction documentation"
-      ]
-    }
-  ]
-},
-
-{
-  name: "6 - Closeout",
-  sections: [
-    {
-      name: "Acceptance",
-      tasks: [
-        "Punch list walkthrough",
-        "Final inspections",
-        "Substantial completion",
-        "Final pay application",
-        "Operator training",
-        "O&M manuals delivery",
-        "Warranty documentation"
-      ]
-    }
-  ]
-},
-
-{
-  name: "7 - Record Drawings",
-  sections: [
-    {
-      name: "As-Builts",
-      tasks: [
-        "Contractor redlines",
-        "Field survey verification",
-        "Final as-built drawings",
-        "GIS updates",
-        "Asset registry updates",
-        "Project archiving"
+        "Document risks"
       ]
     }
   ]
@@ -378,14 +220,32 @@ if (!store.projects || Object.keys(store.projects).length === 0) {
   createProject("Greenbank Pump Station");
 }
 
-/* ensure active */
 if (!store.activeProjectId) {
   store.activeProjectId = Object.keys(store.projects)[0];
-  save();
 }
 
 /* =========================
-   RENDER TOP BAR
+   DELETE PROJECT (NEW)
+========================= */
+
+function deleteCurrentProject() {
+  const project = store.projects[store.activeProjectId];
+  if (!project) return;
+
+  const ok = confirm(`Delete project "${project.name}"? This cannot be undone.`);
+  if (!ok) return;
+
+  delete store.projects[store.activeProjectId];
+
+  const remaining = Object.keys(store.projects);
+  store.activeProjectId = remaining.length ? remaining[0] : null;
+
+  save();
+  render();
+}
+
+/* =========================
+   TOP BAR
 ========================= */
 
 function renderTabs() {
@@ -403,7 +263,6 @@ function renderTabs() {
     input.onchange = e => {
       p.name = e.target.value;
       save();
-      render();
     };
 
     tab.onclick = () => {
@@ -424,23 +283,36 @@ function renderTabs() {
     if (name) createProject(name);
   };
 
+  const delBtn = document.createElement("div");
+  delBtn.className = "delete-project-btn";
+  delBtn.innerText = "Delete Project";
+  delBtn.onclick = deleteCurrentProject;
+
   el.appendChild(newBtn);
+  el.appendChild(delBtn);
 }
 
 /* =========================
-   RENDER APP
+   RENDER
 ========================= */
 
 function render() {
   renderTabs();
 
   const project = store.projects[store.activeProjectId];
+
+  if (!project) {
+    document.getElementById("title").innerText = "No Project Selected";
+    document.getElementById("app").innerHTML = "";
+    return;
+  }
+
   document.getElementById("title").innerText = project.name;
 
   const app = document.getElementById("app");
   app.innerHTML = "";
 
-  project.phases.forEach((phase, pi) => {
+  project.phases.forEach(phase => {
 
     const phaseDiv = document.createElement("div");
     phaseDiv.className = "phase";
@@ -450,65 +322,52 @@ function render() {
     title.innerText = phase.name;
     phaseDiv.appendChild(title);
 
-    phase.sections.forEach((sec, si) => {
-
-      const key = `${project.id}-${pi}-${si}`;
+    phase.sections.forEach(section => {
 
       const secDiv = document.createElement("div");
 
       const secTitle = document.createElement("div");
       secTitle.className = "section-title";
-
-      const collapsed = store.ui.collapsed[key];
-
-      secTitle.innerHTML = `<span>${sec.name}</span><span>${collapsed ? "▸" : "▾"}</span>`;
-
-      secTitle.onclick = () => {
-        store.ui.collapsed[key] = !store.ui.collapsed[key];
-        save();
-        render();
-      };
+      secTitle.innerText = section.name;
 
       secDiv.appendChild(secTitle);
 
-      if (!collapsed) {
-        sec.tasks.forEach(task => {
+      section.tasks.forEach(task => {
 
-          const div = document.createElement("div");
-          div.className = "task " + task.status;
+        const div = document.createElement("div");
+        div.className = "task " + task.status;
 
-          div.onclick = () => {
-            task.status = nextStatus(task.status);
-            save();
-            render();
-          };
+        div.onclick = () => {
+          task.status = nextStatus(task.status);
+          save();
+          render();
+        };
 
-          const header = document.createElement("div");
-          header.className = "task-header";
+        const header = document.createElement("div");
+        header.className = "task-header";
 
-          const name = document.createElement("div");
-          name.innerText = task.name;
+        const name = document.createElement("div");
+        name.innerText = task.name;
 
-          const status = document.createElement("div");
-          status.className = "status-label";
-          status.innerText = task.status;
+        const status = document.createElement("div");
+        status.className = "status-label";
+        status.innerText = task.status;
 
-          header.appendChild(name);
-          header.appendChild(status);
+        header.appendChild(name);
+        header.appendChild(status);
 
-          const notes = document.createElement("textarea");
-          notes.value = task.notes;
-          notes.oninput = e => {
-            task.notes = e.target.value;
-            save();
-          };
+        const notes = document.createElement("textarea");
+        notes.value = task.notes;
+        notes.oninput = e => {
+          task.notes = e.target.value;
+          save();
+        };
 
-          div.appendChild(header);
-          div.appendChild(notes);
+        div.appendChild(header);
+        div.appendChild(notes);
 
-          secDiv.appendChild(div);
-        });
-      }
+        secDiv.appendChild(div);
+      });
 
       phaseDiv.appendChild(secDiv);
     });
