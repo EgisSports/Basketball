@@ -34,6 +34,26 @@ body {
   background: #2563eb;
 }
 
+/* FILTER BAR */
+.filterbar {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0 20px 0;
+}
+
+.filter-btn {
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #e5e7eb;
+  font-size: 13px;
+}
+
+.filter-btn.active {
+  background: #2563eb;
+  color: white;
+}
+
 /* MAIN */
 .container {
   padding: 20px;
@@ -55,6 +75,7 @@ body {
   margin-bottom: 10px;
 }
 
+/* SECTION */
 .section {
   border-top: 1px solid #e5e7eb;
   padding-top: 10px;
@@ -64,6 +85,8 @@ body {
 .section-title {
   font-weight: bold;
   cursor: pointer;
+  display: flex;
+  justify-content: space-between;
 }
 
 /* TASK */
@@ -79,9 +102,28 @@ body {
   filter: brightness(0.97);
 }
 
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .task-name {
   font-weight: bold;
 }
+
+/* STATUS LABEL */
+.status-label {
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* FULL BLOCK COLORS */
+.not-started { background: #f3f4f6; }
+.in-progress { background: #dbeafe; }
+.blocked { background: #fee2e2; }
+.complete { background: #d1fae5; }
 
 textarea {
   width: 100%;
@@ -89,25 +131,8 @@ textarea {
   height: 50px;
 }
 
-/* FULL-BLOCK STATUS COLORS */
-.not-started {
-  background: #f3f4f6;
-}
-
-.in-progress {
-  background: #dbeafe;
-}
-
-.blocked {
-  background: #fee2e2;
-}
-
-.complete {
-  background: #d1fae5;
-}
-
-small {
-  color: #6b7280;
+.hidden {
+  display: none;
 }
 </style>
 </head>
@@ -115,15 +140,19 @@ small {
 <body>
 
 <div class="topbar" id="projectTabs"></div>
+
 <div class="container">
   <h2 id="projectTitle"></h2>
+
+  <div class="filterbar" id="filters"></div>
+
   <div id="app"></div>
 </div>
 
 <script>
 
 /* =========================
-   STATUS MODEL
+   STATUS SYSTEM
 ========================= */
 
 const STATUSES = ["not-started","in-progress","blocked","complete"];
@@ -134,7 +163,25 @@ function nextStatus(current) {
 }
 
 /* =========================
-   EXPANDED MUNICIPAL WBS
+   FILTER STATE
+========================= */
+
+let activeFilter = "all";
+
+/* =========================
+   UI STATE (COLLAPSE)
+========================= */
+
+let uiState = JSON.parse(localStorage.getItem("uiState")) || {
+  collapsed: {}
+};
+
+function saveUIState() {
+  localStorage.setItem("uiState", JSON.stringify(uiState));
+}
+
+/* =========================
+   EXPANDED ENGINEERING WBS
 ========================= */
 
 const phasesTemplate = [
@@ -145,12 +192,10 @@ const phasesTemplate = [
       name: "Internal & Client Kickoff",
       tasks: [
         "Initial internal scoping discussion",
-        "Define project drivers (capacity, condition, compliance, growth)",
+        "Define drivers (capacity, condition, compliance)",
         "Client kickoff meeting",
-        "Establish communication protocol",
-        "Define regulatory framework (IDNR / IDEM / EPA / local)",
-        "Confirm funding source (SRF, grant, bond, capital budget)",
-        "Risk screening (schedule, constructability, utility conflicts)",
+        "Funding source identification",
+        "Risk screening (schedule, constructability, utilities)",
         "Go / No-Go decision"
       ]
     }
@@ -158,175 +203,45 @@ const phasesTemplate = [
 },
 
 {
-  name: "1 - Planning & Field Investigation",
+  name: "1 - Planning & Investigation",
   sections: [
     {
-      name: "Existing System Review",
+      name: "Field & Data Collection",
       tasks: [
-        "Collect GIS base mapping and utility layers",
-        "Review as-builts and record drawings",
-        "Compile O&M records and historical failures",
-        "Review CSO/SSO history if applicable",
-        "Identify downstream/upstream system constraints"
+        "GIS utility compilation",
+        "As-built drawing review",
+        "CCTV inspection (sanitary defects, I/I)",
+        "Manhole inspection",
+        "Hydrant flow testing",
+        "Pump station evaluation",
+        "Rainfall / flow monitoring",
+        "Water quality sampling"
       ]
     },
     {
-      name: "Field Investigation",
+      name: "Hydraulic Analysis",
       tasks: [
-        "Site reconnaissance visit",
-        "Sanitary CCTV inspection (defects, infiltration, roots)",
-        "Storm sewer condition assessment",
-        "Manhole inspection and depth verification",
-        "Hydrant flow testing / fire flow analysis",
-        "Water main valve exercising / field verification",
-        "Pump station performance evaluation",
-        "Wet weather flow monitoring setup",
-        "Rainfall correlation analysis",
-        "Sampling (I/I, water quality, effluent if needed)"
-      ]
-    },
-    {
-      name: "Hydraulic & System Analysis",
-      tasks: [
-        "Develop baseline hydraulic model (SWMM / EPANET)",
-        "Calibrate model with field data",
-        "Identify capacity constraints and surcharge points",
-        "Evaluate infiltration/inflow contributions",
-        "Identify flood risk and overflow points"
+        "Develop SWMM / EPANET model",
+        "Calibrate model",
+        "Identify bottlenecks",
+        "Evaluate I/I sources",
+        "Flood risk mapping"
       ]
     }
   ]
 },
 
 {
-  name: "2 - Preliminary Design (30%)",
+  name: "2 - Preliminary Design",
   sections: [
     {
       name: "Concept Development",
       tasks: [
-        "Develop alternative solutions (repair, replace, upsizing, reroute)",
-        "Evaluate gravity vs pump alternatives",
-        "Preliminary alignment and corridor selection",
-        "Preliminary utility conflict mapping",
-        "Constructability review (access, staging, bypass pumping)",
-        "Permitting pathway identification"
-      ]
-    },
-    {
-      name: "Preliminary Engineering",
-      tasks: [
-        "Topographic survey coordination",
-        "Geotechnical borings request",
-        "Preliminary pipe sizing and slopes",
-        "Preliminary hydraulic grade line development",
-        "Pump station preliminary sizing (if applicable)",
-        "Order of magnitude cost estimate",
-        "30% plan set development"
-      ]
-    }
-  ]
-},
-
-{
-  name: "3 - Detailed Design (60–90%)",
-  sections: [
-    {
-      name: "Final Engineering Design",
-      tasks: [
-        "Final horizontal and vertical alignment",
-        "Detailed pipe network design",
-        "Manhole structure design and spacing",
-        "Easement and ROW determination",
-        "Erosion control design (NPDES compliance)",
-        "Pump station final design (if applicable)",
-        "Force main surge analysis (if applicable)",
-        "Final hydraulic model runs",
-        "Technical specifications drafting"
-      ]
-    },
-    {
-      name: "Permitting & Coordination",
-      tasks: [
-        "IDNR/IDEA/IDE requirements review",
-        "Section 401/404 coordination if wetlands involved",
-        "Railroad/utility crossings coordination",
-        "Local agency utility approvals",
-        "Permit application submission",
-        "Respond to regulatory comments"
-      ]
-    }
-  ]
-},
-
-{
-  name: "4 - Final Design / Bid Package",
-  sections: [
-    {
-      name: "Contract Documents",
-      tasks: [
-        "Final QA/QC review of plans",
-        "Final technical specifications",
-        "Engineer’s Opinion of Probable Cost",
-        "Bid schedule preparation",
-        "Addenda preparation during bidding",
-        "Bid advertisement support",
-        "Pre-bid meeting coordination"
-      ]
-    }
-  ]
-},
-
-{
-  name: "5 - Construction Administration",
-  sections: [
-    {
-      name: "Construction Oversight",
-      tasks: [
-        "Pre-construction meeting",
-        "Shop drawing review",
-        "RFI response tracking",
-        "Submittal log maintenance",
-        "Site visits and progress documentation",
-        "Pay application review",
-        "Change order evaluation",
-        "Construction testing oversight (compaction, pressure tests, leakage)",
-        "Utility coordination during construction",
-        "Traffic control review"
-      ]
-    }
-  ]
-},
-
-{
-  name: "6 - Project Closeout",
-  sections: [
-    {
-      name: "Final Acceptance",
-      tasks: [
-        "Punch list development and verification",
-        "System startup and operational testing",
-        "Final walkthrough with owner",
-        "Substantial completion certification",
-        "Final pay application approval",
-        "Training for operator staff",
-        "O&M manual delivery"
-      ]
-    }
-  ]
-},
-
-{
-  name: "7 - Record Drawings / Asset Handoff",
-  sections: [
-    {
-      name: "As-Builts & GIS",
-      tasks: [
-        "Contractor redline collection",
-        "Survey verification of installed utilities",
-        "Final as-built plan preparation",
-        "GIS database update",
-        "Asset registry population",
-        "Project archive and documentation closeout"
+        "Develop alternatives",
+        "Evaluate gravity vs pumped systems",
+        "Preliminary alignment selection",
+        "Utility conflict screening",
+        "Preliminary constructability review"
       ]
     }
   ]
@@ -334,12 +249,11 @@ const phasesTemplate = [
 ];
 
 /* =========================
-   STATE
+   PROJECT STATE
 ========================= */
 
 const projectNames = [
-"Project 1","Project 2","Project 3","Project 4",
-"Project 5","Project 6","Project 7","Project 8"
+"Project 1","Project 2","Project 3","Project 4"
 ];
 
 let projects = JSON.parse(localStorage.getItem("projects")) || {};
@@ -366,7 +280,27 @@ function save() {
 }
 
 /* =========================
-   RENDER
+   FILTER UI
+========================= */
+
+function renderFilters() {
+  const f = document.getElementById("filters");
+  f.innerHTML = "";
+
+  ["all", ...STATUSES].forEach(status => {
+    const btn = document.createElement("div");
+    btn.className = "filter-btn" + (activeFilter === status ? " active" : "");
+    btn.innerText = status;
+    btn.onclick = () => {
+      activeFilter = status;
+      render();
+    };
+    f.appendChild(btn);
+  });
+}
+
+/* =========================
+   TABS
 ========================= */
 
 function renderTabs() {
@@ -385,8 +319,14 @@ function renderTabs() {
   });
 }
 
+/* =========================
+   RENDER
+========================= */
+
 function render() {
   renderTabs();
+  renderFilters();
+
   document.getElementById("projectTitle").innerText = currentProject;
 
   const app = document.getElementById("app");
@@ -394,7 +334,8 @@ function render() {
 
   const project = projects[currentProject];
 
-  project.forEach((phase) => {
+  project.forEach((phase, pIndex) => {
+
     const phaseDiv = document.createElement("div");
     phaseDiv.className = "phase";
 
@@ -403,44 +344,75 @@ function render() {
     title.innerText = phase.name;
     phaseDiv.appendChild(title);
 
-    phase.sections.forEach(section => {
+    phase.sections.forEach((section, sIndex) => {
+
+      const key = `${currentProject}-${pIndex}-${sIndex}`;
+
       const secDiv = document.createElement("div");
       secDiv.className = "section";
 
       const secTitle = document.createElement("div");
       secTitle.className = "section-title";
-      secTitle.innerText = section.name;
+
+      const isCollapsed = uiState.collapsed[key];
+
+      secTitle.innerHTML = `
+        <span>${section.name}</span>
+        <span>${isCollapsed ? "▸" : "▾"}</span>
+      `;
+
+      secTitle.onclick = () => {
+        uiState.collapsed[key] = !uiState.collapsed[key];
+        saveUIState();
+        render();
+      };
+
       secDiv.appendChild(secTitle);
 
-      section.tasks.forEach(task => {
+      if (!isCollapsed) {
 
-        const taskDiv = document.createElement("div");
-        taskDiv.className = "task " + task.status;
+        section.tasks
+          .filter(t => activeFilter === "all" || t.status === activeFilter)
+          .forEach(task => {
 
-        taskDiv.onclick = () => {
-          task.status = nextStatus(task.status);
-          save();
-          render();
-        };
+          const taskDiv = document.createElement("div");
+          taskDiv.className = "task " + task.status;
 
-        const name = document.createElement("div");
-        name.className = "task-name";
-        name.innerText = task.name;
+          taskDiv.onclick = () => {
+            task.status = nextStatus(task.status);
+            save();
+            render();
+          };
 
-        const notes = document.createElement("textarea");
-        notes.value = task.notes;
-        notes.placeholder = "Notes / updates...";
-        notes.onclick = (e) => e.stopPropagation();
-        notes.oninput = (e) => {
-          task.notes = e.target.value;
-          save();
-        };
+          const header = document.createElement("div");
+          header.className = "task-header";
 
-        taskDiv.appendChild(name);
-        taskDiv.appendChild(notes);
+          const name = document.createElement("div");
+          name.className = "task-name";
+          name.innerText = task.name;
 
-        secDiv.appendChild(taskDiv);
-      });
+          const status = document.createElement("div");
+          status.className = "status-label";
+          status.innerText = task.status.replace("-", " ");
+
+          header.appendChild(name);
+          header.appendChild(status);
+
+          const notes = document.createElement("textarea");
+          notes.value = task.notes;
+          notes.placeholder = "Notes / updates...";
+          notes.onclick = e => e.stopPropagation();
+          notes.oninput = e => {
+            task.notes = e.target.value;
+            save();
+          };
+
+          taskDiv.appendChild(header);
+          taskDiv.appendChild(notes);
+
+          secDiv.appendChild(taskDiv);
+        });
+      }
 
       phaseDiv.appendChild(secDiv);
     });
