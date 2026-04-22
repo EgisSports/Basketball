@@ -11,7 +11,7 @@ body {
   background: #f4f6f9;
 }
 
-/* TOP PROJECT BAR */
+/* TOP BAR */
 .topbar {
   display: flex;
   overflow-x: auto;
@@ -34,14 +34,13 @@ body {
   background: #2563eb;
 }
 
-/* MAIN LAYOUT */
+/* MAIN */
 .container {
   padding: 20px;
   height: calc(100vh - 50px);
   overflow-y: auto;
 }
 
-/* PHASE CARD */
 .phase {
   background: white;
   margin-bottom: 15px;
@@ -56,7 +55,6 @@ body {
   margin-bottom: 10px;
 }
 
-/* SECTION */
 .section {
   border-top: 1px solid #e5e7eb;
   padding-top: 10px;
@@ -66,26 +64,19 @@ body {
 .section-title {
   font-weight: bold;
   cursor: pointer;
-  color: #111827;
 }
 
 /* TASK */
 .task {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
   margin-top: 10px;
-  padding: 10px;
-  background: #f9fafb;
-  border-radius: 8px;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.15s ease;
 }
 
-.task select {
-  height: 30px;
-}
-
-.task-content {
-  flex: 1;
+.task:hover {
+  filter: brightness(0.97);
 }
 
 .task-name {
@@ -98,11 +89,22 @@ textarea {
   height: 50px;
 }
 
-/* STATUS COLORS */
-.not-started { border-left: 4px solid #9ca3af; }
-.in-progress { border-left: 4px solid #3b82f6; }
-.blocked { border-left: 4px solid #ef4444; }
-.complete { border-left: 4px solid #10b981; }
+/* FULL-BLOCK STATUS COLORS */
+.not-started {
+  background: #f3f4f6;
+}
+
+.in-progress {
+  background: #dbeafe;
+}
+
+.blocked {
+  background: #fee2e2;
+}
+
+.complete {
+  background: #d1fae5;
+}
 
 small {
   color: #6b7280;
@@ -119,166 +121,216 @@ small {
 </div>
 
 <script>
+
 /* =========================
-   DATA MODEL
+   STATUS MODEL
+========================= */
+
+const STATUSES = ["not-started","in-progress","blocked","complete"];
+
+function nextStatus(current) {
+  const i = STATUSES.indexOf(current);
+  return STATUSES[(i + 1) % STATUSES.length];
+}
+
+/* =========================
+   EXPANDED MUNICIPAL WBS
 ========================= */
 
 const phasesTemplate = [
-  {
-    name: "0 - Project Rumblings",
-    sections: [
-      {
-        name: "Initiation",
-        tasks: [
-          "Initial Internal Discussion",
-          "Client Contact / Request Intake",
-          "Go / No-Go Decision",
-          "Proposal Authorization"
-        ]
-      }
-    ]
-  },
-  {
-    name: "1 - Planning & Investigation",
-    sections: [
-      {
-        name: "Investigation",
-        tasks: [
-          "Kickoff & Team Setup",
-          "Site Visit & Condition Assessment",
-          "CCTV Inspection (Sanitary)",
-          "Hydrant Flow Testing",
-          "Pump Station Evaluation",
-          "Flow Monitoring & Rainfall Analysis",
-          "Water Quality Sampling",
-          "Gather Existing Data (GIS, As-builts, O&M)"
-        ]
-      },
-      {
-        name: "Analysis & Scoping",
-        tasks: [
-          "Define Problem & Objectives",
-          "Identify Constraints",
-          "Evaluate Alternatives",
-          "Preliminary Cost & Schedule"
-        ]
-      },
-      {
-        name: "Decision",
-        tasks: [
-          "Feasibility Determination",
-          "Select Preferred Alternative",
-          "Funding Confirmation"
-        ]
-      }
-    ]
-  },
-  {
-    name: "2 - Preliminary Design (30%)",
-    sections: [
-      {
-        name: "Design Development",
-        tasks: [
-          "Topographic Survey",
-          "Utility Coordination",
-          "Geotechnical Investigation",
-          "Preliminary Layout & Alignment",
-          "Hydraulic Modeling (EPANET / SWMM)",
-          "Preliminary Cost Estimate",
-          "30% Design Package"
-        ]
-      }
-    ]
-  },
-  {
-    name: "3 - Detailed Design (60–90%)",
-    sections: [
-      {
-        name: "Engineering Design",
-        tasks: [
-          "Final Layout & Profiles",
-          "Pipe Materials Selection",
-          "Pump Station Design",
-          "Storm/Sanitary Separation Design",
-          "Treatment / Flow Control Elements",
-          "Draft Specifications",
-          "60–90% Plans"
-        ]
-      },
-      {
-        name: "Permitting",
-        tasks: [
-          "Environmental Permits",
-          "Agency Coordination",
-          "Permit Applications",
-          "Regulatory Review Response"
-        ]
-      }
-    ]
-  },
-  {
-    name: "4 - Final Design / Bid Package",
-    sections: [
-      {
-        name: "Finalization",
-        tasks: [
-          "QA/QC Review",
-          "Final Plans & Specs",
-          "Engineer’s Opinion of Cost",
-          "Bid Package Assembly",
-          "Addenda Preparation",
-          "Bid Advertisement"
-        ]
-      }
-    ]
-  },
-  {
-    name: "5 - Construction Administration",
-    sections: [
-      {
-        name: "Field Work",
-        tasks: [
-          "Pre-Construction Meeting",
-          "Submittal Review",
-          "RFI Responses",
-          "Site Visits",
-          "Pay Applications Review",
-          "Change Orders",
-          "Construction Testing Oversight"
-        ]
-      }
-    ]
-  },
-  {
-    name: "6 - Project Closeout",
-    sections: [
-      {
-        name: "Closeout",
-        tasks: [
-          "Punch List Walkthrough",
-          "System Performance Verification",
-          "Final Pay Application",
-          "Training & O&M Manuals",
-          "Substantial Completion"
-        ]
-      }
-    ]
-  },
-  {
-    name: "7 - As-Builts / Record Drawings",
-    sections: [
-      {
-        name: "Record Documentation",
-        tasks: [
-          "Contractor Redlines",
-          "Survey Verification",
-          "GIS Updates",
-          "Final As-Built Drawings",
-          "Project Archive Completion"
-        ]
-      }
-    ]
-  }
+{
+  name: "0 - Project Initiation",
+  sections: [
+    {
+      name: "Internal & Client Kickoff",
+      tasks: [
+        "Initial internal scoping discussion",
+        "Define project drivers (capacity, condition, compliance, growth)",
+        "Client kickoff meeting",
+        "Establish communication protocol",
+        "Define regulatory framework (IDNR / IDEM / EPA / local)",
+        "Confirm funding source (SRF, grant, bond, capital budget)",
+        "Risk screening (schedule, constructability, utility conflicts)",
+        "Go / No-Go decision"
+      ]
+    }
+  ]
+},
+
+{
+  name: "1 - Planning & Field Investigation",
+  sections: [
+    {
+      name: "Existing System Review",
+      tasks: [
+        "Collect GIS base mapping and utility layers",
+        "Review as-builts and record drawings",
+        "Compile O&M records and historical failures",
+        "Review CSO/SSO history if applicable",
+        "Identify downstream/upstream system constraints"
+      ]
+    },
+    {
+      name: "Field Investigation",
+      tasks: [
+        "Site reconnaissance visit",
+        "Sanitary CCTV inspection (defects, infiltration, roots)",
+        "Storm sewer condition assessment",
+        "Manhole inspection and depth verification",
+        "Hydrant flow testing / fire flow analysis",
+        "Water main valve exercising / field verification",
+        "Pump station performance evaluation",
+        "Wet weather flow monitoring setup",
+        "Rainfall correlation analysis",
+        "Sampling (I/I, water quality, effluent if needed)"
+      ]
+    },
+    {
+      name: "Hydraulic & System Analysis",
+      tasks: [
+        "Develop baseline hydraulic model (SWMM / EPANET)",
+        "Calibrate model with field data",
+        "Identify capacity constraints and surcharge points",
+        "Evaluate infiltration/inflow contributions",
+        "Identify flood risk and overflow points"
+      ]
+    }
+  ]
+},
+
+{
+  name: "2 - Preliminary Design (30%)",
+  sections: [
+    {
+      name: "Concept Development",
+      tasks: [
+        "Develop alternative solutions (repair, replace, upsizing, reroute)",
+        "Evaluate gravity vs pump alternatives",
+        "Preliminary alignment and corridor selection",
+        "Preliminary utility conflict mapping",
+        "Constructability review (access, staging, bypass pumping)",
+        "Permitting pathway identification"
+      ]
+    },
+    {
+      name: "Preliminary Engineering",
+      tasks: [
+        "Topographic survey coordination",
+        "Geotechnical borings request",
+        "Preliminary pipe sizing and slopes",
+        "Preliminary hydraulic grade line development",
+        "Pump station preliminary sizing (if applicable)",
+        "Order of magnitude cost estimate",
+        "30% plan set development"
+      ]
+    }
+  ]
+},
+
+{
+  name: "3 - Detailed Design (60–90%)",
+  sections: [
+    {
+      name: "Final Engineering Design",
+      tasks: [
+        "Final horizontal and vertical alignment",
+        "Detailed pipe network design",
+        "Manhole structure design and spacing",
+        "Easement and ROW determination",
+        "Erosion control design (NPDES compliance)",
+        "Pump station final design (if applicable)",
+        "Force main surge analysis (if applicable)",
+        "Final hydraulic model runs",
+        "Technical specifications drafting"
+      ]
+    },
+    {
+      name: "Permitting & Coordination",
+      tasks: [
+        "IDNR/IDEA/IDE requirements review",
+        "Section 401/404 coordination if wetlands involved",
+        "Railroad/utility crossings coordination",
+        "Local agency utility approvals",
+        "Permit application submission",
+        "Respond to regulatory comments"
+      ]
+    }
+  ]
+},
+
+{
+  name: "4 - Final Design / Bid Package",
+  sections: [
+    {
+      name: "Contract Documents",
+      tasks: [
+        "Final QA/QC review of plans",
+        "Final technical specifications",
+        "Engineer’s Opinion of Probable Cost",
+        "Bid schedule preparation",
+        "Addenda preparation during bidding",
+        "Bid advertisement support",
+        "Pre-bid meeting coordination"
+      ]
+    }
+  ]
+},
+
+{
+  name: "5 - Construction Administration",
+  sections: [
+    {
+      name: "Construction Oversight",
+      tasks: [
+        "Pre-construction meeting",
+        "Shop drawing review",
+        "RFI response tracking",
+        "Submittal log maintenance",
+        "Site visits and progress documentation",
+        "Pay application review",
+        "Change order evaluation",
+        "Construction testing oversight (compaction, pressure tests, leakage)",
+        "Utility coordination during construction",
+        "Traffic control review"
+      ]
+    }
+  ]
+},
+
+{
+  name: "6 - Project Closeout",
+  sections: [
+    {
+      name: "Final Acceptance",
+      tasks: [
+        "Punch list development and verification",
+        "System startup and operational testing",
+        "Final walkthrough with owner",
+        "Substantial completion certification",
+        "Final pay application approval",
+        "Training for operator staff",
+        "O&M manual delivery"
+      ]
+    }
+  ]
+},
+
+{
+  name: "7 - Record Drawings / Asset Handoff",
+  sections: [
+    {
+      name: "As-Builts & GIS",
+      tasks: [
+        "Contractor redline collection",
+        "Survey verification of installed utilities",
+        "Final as-built plan preparation",
+        "GIS database update",
+        "Asset registry population",
+        "Project archive and documentation closeout"
+      ]
+    }
+  ]
+}
 ];
 
 /* =========================
@@ -286,14 +338,13 @@ const phasesTemplate = [
 ========================= */
 
 const projectNames = [
-  "Project 1","Project 2","Project 3","Project 4",
-  "Project 5","Project 6","Project 7","Project 8"
+"Project 1","Project 2","Project 3","Project 4",
+"Project 5","Project 6","Project 7","Project 8"
 ];
 
 let projects = JSON.parse(localStorage.getItem("projects")) || {};
 let currentProject = projectNames[0];
 
-/* init */
 projectNames.forEach(p => {
   if (!projects[p]) {
     projects[p] = structuredClone(phasesTemplate).map(phase => ({
@@ -315,7 +366,7 @@ function save() {
 }
 
 /* =========================
-   UI RENDER
+   RENDER
 ========================= */
 
 function renderTabs() {
@@ -334,18 +385,8 @@ function renderTabs() {
   });
 }
 
-function statusClass(status) {
-  return {
-    "not-started": "not-started",
-    "in-progress": "in-progress",
-    "blocked": "blocked",
-    "complete": "complete"
-  }[status];
-}
-
 function render() {
   renderTabs();
-
   document.getElementById("projectTitle").innerText = currentProject;
 
   const app = document.getElementById("app");
@@ -353,7 +394,7 @@ function render() {
 
   const project = projects[currentProject];
 
-  project.forEach((phase, pIndex) => {
+  project.forEach((phase) => {
     const phaseDiv = document.createElement("div");
     phaseDiv.className = "phase";
 
@@ -362,7 +403,7 @@ function render() {
     title.innerText = phase.name;
     phaseDiv.appendChild(title);
 
-    phase.sections.forEach((section, sIndex) => {
+    phase.sections.forEach(section => {
       const secDiv = document.createElement("div");
       secDiv.className = "section";
 
@@ -371,28 +412,16 @@ function render() {
       secTitle.innerText = section.name;
       secDiv.appendChild(secTitle);
 
-      section.tasks.forEach((task, tIndex) => {
+      section.tasks.forEach(task => {
 
         const taskDiv = document.createElement("div");
-        taskDiv.className = "task " + statusClass(task.status);
+        taskDiv.className = "task " + task.status;
 
-        const select = document.createElement("select");
-        ["not-started","in-progress","blocked","complete"].forEach(s => {
-          const opt = document.createElement("option");
-          opt.value = s;
-          opt.text = s;
-          if (task.status === s) opt.selected = true;
-          select.appendChild(opt);
-        });
-
-        select.onchange = (e) => {
-          task.status = e.target.value;
+        taskDiv.onclick = () => {
+          task.status = nextStatus(task.status);
           save();
           render();
         };
-
-        const content = document.createElement("div");
-        content.className = "task-content";
 
         const name = document.createElement("div");
         name.className = "task-name";
@@ -401,16 +430,14 @@ function render() {
         const notes = document.createElement("textarea");
         notes.value = task.notes;
         notes.placeholder = "Notes / updates...";
+        notes.onclick = (e) => e.stopPropagation();
         notes.oninput = (e) => {
           task.notes = e.target.value;
           save();
         };
 
-        content.appendChild(name);
-        content.appendChild(notes);
-
-        taskDiv.appendChild(select);
-        taskDiv.appendChild(content);
+        taskDiv.appendChild(name);
+        taskDiv.appendChild(notes);
 
         secDiv.appendChild(taskDiv);
       });
@@ -426,6 +453,7 @@ function render() {
 
 /* INIT */
 render();
+
 </script>
 
 </body>
