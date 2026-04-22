@@ -12,23 +12,19 @@ body {
   color: #e5e7eb;
 }
 
-/* TOP BAR */
 .topbar {
   display: flex;
   overflow-x: auto;
   background: #0b1220;
   padding: 10px;
   gap: 10px;
-  white-space: nowrap;
 }
 
 .project-tab {
-  padding: 8px 14px;
+  padding: 8px;
   background: #374151;
   border-radius: 6px;
-  cursor: pointer;
-  flex-shrink: 0;
-  min-width: 120px;
+  min-width: 160px;
   text-align: center;
 }
 
@@ -36,95 +32,64 @@ body {
   background: #2563eb;
 }
 
-/* FILTER BAR */
-.filterbar {
-  display: flex;
-  gap: 10px;
-  margin: 10px 0 20px 0;
+.project-tab input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: white;
+  text-align: center;
+  font-size: 14px;
 }
 
-.filter-btn {
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  background: #1f2937;
-  font-size: 13px;
-  color: #e5e7eb;
-}
-
-.filter-btn.active {
-  background: #2563eb;
-}
-
-/* MAIN */
 .container {
   padding: 20px;
   height: calc(100vh - 50px);
   overflow-y: auto;
 }
 
-/* PHASE CARD */
 .phase {
   background: #1f2937;
   margin-bottom: 15px;
   border-radius: 10px;
   padding: 15px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .phase-title {
   font-size: 20px;
   font-weight: bold;
-  margin-bottom: 10px;
 }
 
-/* SECTION */
 .section {
   border-top: 1px solid #374151;
-  padding-top: 10px;
   margin-top: 10px;
+  padding-top: 10px;
 }
 
 .section-title {
-  font-weight: bold;
-  cursor: pointer;
   display: flex;
   justify-content: space-between;
+  font-weight: bold;
+  cursor: pointer;
 }
 
-/* TASK */
 .task {
   margin-top: 10px;
   padding: 12px;
   border-radius: 10px;
   cursor: pointer;
-  transition: 0.15s ease;
-  background: #2b3444; /* LIGHTER TILE */
-}
-
-.task:hover {
-  filter: brightness(1.08);
+  background: #2b3444;
 }
 
 .task-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.task-name {
-  font-weight: bold;
 }
 
 .status-label {
   font-size: 11px;
-  font-weight: bold;
   text-transform: uppercase;
-  opacity: 0.85;
 }
 
-/* STATUS COLORS */
 .not-started { background: #2b3444; }
 .in-progress { background: #1e3a8a; }
 .blocked { background: #7f1d1d; }
@@ -133,74 +98,35 @@ body {
 textarea {
   width: 100%;
   margin-top: 6px;
-  height: 55px;
-  border-radius: 6px;
-  border: 1px solid #374151;
-  padding: 6px;
-  font-family: inherit;
   background: #111827;
   color: #e5e7eb;
+  border: 1px solid #374151;
 }
-
-.hidden { display: none; }
 </style>
 </head>
 
 <body>
 
-<div class="topbar" id="projectTabs"></div>
+<div class="topbar" id="tabs"></div>
 
 <div class="container">
-  <h2 id="projectTitle"></h2>
-  <div class="filterbar" id="filters"></div>
+  <h2 id="title"></h2>
   <div id="app"></div>
 </div>
 
 <script>
 
 /* =========================
-   STATUS SYSTEM
+   STATUS
 ========================= */
-
 const STATUSES = ["not-started","in-progress","blocked","complete"];
 
-function nextStatus(current) {
-  const i = STATUSES.indexOf(current);
-  return STATUSES[(i + 1) % STATUSES.length];
+function nextStatus(s) {
+  return STATUSES[(STATUSES.indexOf(s) + 1) % STATUSES.length];
 }
 
 /* =========================
-   FILTER STATE
-========================= */
-
-let activeFilter = "all";
-
-/* =========================
-   UI STATE
-========================= */
-
-let uiState = JSON.parse(localStorage.getItem("uiState")) || {
-  collapsed: {}
-};
-
-function saveUIState() {
-  localStorage.setItem("uiState", JSON.stringify(uiState));
-}
-
-/* =========================
-   PROJECTS
-========================= */
-
-let projectNames = JSON.parse(localStorage.getItem("projectNames")) || [
-  "Project 1","Project 2","Project 3","Project 4"
-];
-
-function saveProjectNames() {
-  localStorage.setItem("projectNames", JSON.stringify(projectNames));
-}
-
-/* =========================
-   EXPANDED MUNICIPAL WBS
+   MASTER TEMPLATE (LATEST VERSION)
 ========================= */
 
 const phasesTemplate = [
@@ -208,84 +134,46 @@ const phasesTemplate = [
   name: "0 - Project Kickoff",
   sections: [
     {
-      name: "Internal Setup & Client Engagement",
+      name: "Internal Setup",
       tasks: [
-        "Identify client PM (City Engineer / Utilities Director)",
-        "Internal discipline kickoff (civil, process, structural, electrical)",
-        "Define regulatory triggers (IDNR, IDEM, EPA, MS4)",
-        "Confirm funding source (SRF / ARPA / capital budget)",
-        "Prepare project initiation memo",
+        "Identify client PM",
+        "Internal discipline kickoff (civil/process/structural)",
+        "Define regulatory triggers (IDNR/IDEM/EPA/MS4)",
+        "Confirm funding source",
+        "Prepare kickoff memo",
         "Establish communication matrix",
-        "Schedule kickoff meeting",
-        "Document project risks"
+        "Document risks"
       ]
     }
   ]
 },
-
 {
   name: "1 - Planning & Investigation",
   sections: [
     {
-      name: "Field & Data Collection",
+      name: "Field Data",
       tasks: [
         "GIS utility compilation",
-        "As-built drawing review",
-        "CCTV inspection (sanitary sewer)",
-        "Manhole inspection & defect coding",
+        "As-built review",
+        "CCTV inspection",
+        "Manhole inspection",
         "Hydrant flow testing",
-        "Pump station field evaluation",
-        "Flow monitoring / I&I study setup",
-        "Wet weather observation"
+        "Pump station evaluation",
+        "Flow monitoring setup"
       ]
     }
   ]
 },
-
 {
   name: "2 - Preliminary Design",
   sections: [
     {
       name: "Concept Development",
       tasks: [
-        "Develop system alternatives",
-        "Evaluate gravity vs pump solutions",
-        "Preliminary alignment selection",
-        "Utility conflict screening",
-        "Constructability review"
-      ]
-    },
-    {
-      name: "Equipment & Process Selection",
-      tasks: [
-        "Preliminary pump selection (duty point, curves)",
-        "Evaluate vendor pump options",
-        "UV disinfection system preliminary sizing (if applicable)",
-        "Blower/aeration equipment screening (if applicable)",
-        "Review packaged equipment vendors",
-        "Coordinate with manufacturer reps for budget pricing",
-        "Preliminary equipment layout coordination"
-      ]
-    }
-  ]
-},
-
-{
-  name: "3 - Detailed Design",
-  sections: [
-    {
-      name: "Final Engineering Design",
-      tasks: [
-        "Finalize alignment and grading",
-        "Manhole structure design",
-        "Pipe schedule finalization",
-        "Utility conflict resolution",
-        "Erosion control design",
-        "Pump station final design",
-        "Force main analysis (if applicable)",
-        "Equipment specification development",
-        "Coordinate final vendor submittals (pumps/UV/blowers)",
-        "Review manufacturer drawings for compliance"
+        "Develop alternatives",
+        "Gravity vs pump evaluation",
+        "Alignment selection",
+        "Utility conflict screening"
       ]
     }
   ]
@@ -293,104 +181,106 @@ const phasesTemplate = [
 ];
 
 /* =========================
-   STATE
+   STATE MODEL (FIXED)
 ========================= */
 
-let projects = JSON.parse(localStorage.getItem("projects")) || {};
-let currentProject = projectNames[0];
+let store = JSON.parse(localStorage.getItem("store")) || {
+  projects: {},
+  activeProjectId: null,
+  ui: { collapsed: {} }
+};
 
-projectNames.forEach(p => {
-  if (!projects[p]) {
-    projects[p] = structuredClone(phasesTemplate).map(phase => ({
-      ...phase,
-      sections: phase.sections.map(sec => ({
-        ...sec,
-        tasks: sec.tasks.map(t => ({
+function save() {
+  localStorage.setItem("store", JSON.stringify(store));
+}
+
+/* =========================
+   MIGRATION (CRITICAL FIX)
+========================= */
+
+function createProject(name) {
+  const id = crypto.randomUUID();
+
+  store.projects[id] = {
+    id,
+    name,
+    phases: structuredClone(phasesTemplate).map(p => ({
+      ...p,
+      sections: p.sections.map(s => ({
+        ...s,
+        tasks: s.tasks.map(t => ({
           name: t,
           status: "not-started",
           notes: ""
         }))
       }))
-    }));
-  }
-});
+    }))
+  };
 
-function save() {
-  localStorage.setItem("projects", JSON.stringify(projects));
+  return id;
+}
+
+/* initialize defaults safely */
+if (!store.projects || Object.keys(store.projects).length === 0) {
+  createProject("Phase IIB Sewer Interceptor");
+  createProject("Greenbank Pump Station");
+  createProject("Forest Valley Water Main");
+  store.activeProjectId = Object.keys(store.projects)[0];
+  save();
+}
+
+/* ensure active project exists */
+if (!store.activeProjectId || !store.projects[store.activeProjectId]) {
+  store.activeProjectId = Object.keys(store.projects)[0];
+  save();
 }
 
 /* =========================
-   FILTERS
-========================= */
-
-function renderFilters() {
-  const f = document.getElementById("filters");
-  f.innerHTML = "";
-
-  ["all", ...STATUSES].forEach(status => {
-    const btn = document.createElement("div");
-    btn.className = "filter-btn" + (activeFilter === status ? " active" : "");
-    btn.innerText = status;
-    btn.onclick = () => {
-      activeFilter = status;
-      render();
-    };
-    f.appendChild(btn);
-  });
-}
-
-/* =========================
-   TABS
+   RENDER TABS (FIXED)
 ========================= */
 
 function renderTabs() {
-  const tabs = document.getElementById("projectTabs");
-  tabs.innerHTML = "";
+  const el = document.getElementById("tabs");
+  el.innerHTML = "";
 
-  projectNames.forEach((p, index) => {
+  Object.values(store.projects).forEach(p => {
 
-    const div = document.createElement("div");
-    div.className = "project-tab" + (p === currentProject ? " active" : "");
+    const tab = document.createElement("div");
+    tab.className = "project-tab" + (p.id === store.activeProjectId ? " active" : "");
 
     const input = document.createElement("input");
-    input.value = p;
-    input.style.width = "100%";
-    input.style.background = "transparent";
-    input.style.border = "none";
-    input.style.color = "white";
-    input.style.textAlign = "center";
+    input.value = p.name;
 
-    input.onchange = (e) => {
-      projectNames[index] = e.target.value;
-      saveProjectNames();
+    input.onchange = e => {
+      p.name = e.target.value;
+      save();
     };
 
-    div.onclick = () => {
-      currentProject = projectNames[index];
+    tab.onclick = () => {
+      store.activeProjectId = p.id;
+      save();
       render();
     };
 
-    div.appendChild(input);
-    tabs.appendChild(div);
+    tab.appendChild(input);
+    el.appendChild(tab);
   });
 }
 
 /* =========================
-   RENDER
+   RENDER APP
 ========================= */
 
 function render() {
   renderTabs();
-  renderFilters();
 
-  document.getElementById("projectTitle").innerText = currentProject;
+  const project = store.projects[store.activeProjectId];
+  document.getElementById("title").innerText = project.name;
 
   const app = document.getElementById("app");
   app.innerHTML = "";
 
-  const project = projects[currentProject];
-
-  project.forEach((phase, pIndex) => {
+  project.phases.forEach((phase, pi) => {
 
     const phaseDiv = document.createElement("div");
     phaseDiv.className = "phase";
@@ -400,39 +290,34 @@ function render() {
     title.innerText = phase.name;
     phaseDiv.appendChild(title);
 
-    phase.sections.forEach((section, sIndex) => {
+    phase.sections.forEach((sec, si) => {
 
-      const key = `${currentProject}-${pIndex}-${sIndex}`;
+      const key = `${project.id}-${pi}-${si}`;
 
       const secDiv = document.createElement("div");
+
       const secTitle = document.createElement("div");
       secTitle.className = "section-title";
 
-      const collapsed = uiState.collapsed[key];
+      const collapsed = store.ui.collapsed[key];
 
-      secTitle.innerHTML = `
-        <span>${section.name}</span>
-        <span>${collapsed ? "▸" : "▾"}</span>
-      `;
+      secTitle.innerHTML = `<span>${sec.name}</span><span>${collapsed ? "▸" : "▾"}</span>`;
 
       secTitle.onclick = () => {
-        uiState.collapsed[key] = !uiState.collapsed[key];
-        saveUIState();
+        store.ui.collapsed[key] = !store.ui.collapsed[key];
+        save();
         render();
       };
 
       secDiv.appendChild(secTitle);
 
       if (!collapsed) {
+        sec.tasks.forEach(task => {
 
-        section.tasks
-          .filter(t => activeFilter === "all" || t.status === activeFilter)
-          .forEach(task => {
+          const div = document.createElement("div");
+          div.className = "task " + task.status;
 
-          const taskDiv = document.createElement("div");
-          taskDiv.className = "task " + task.status;
-
-          taskDiv.onclick = () => {
+          div.onclick = () => {
             task.status = nextStatus(task.status);
             save();
             render();
@@ -442,7 +327,6 @@ function render() {
           header.className = "task-header";
 
           const name = document.createElement("div");
-          name.className = "task-name";
           name.innerText = task.name;
 
           const status = document.createElement("div");
@@ -454,16 +338,15 @@ function render() {
 
           const notes = document.createElement("textarea");
           notes.value = task.notes;
-          notes.onclick = e => e.stopPropagation();
           notes.oninput = e => {
             task.notes = e.target.value;
             save();
           };
 
-          taskDiv.appendChild(header);
-          taskDiv.appendChild(notes);
+          div.appendChild(header);
+          div.appendChild(notes);
 
-          secDiv.appendChild(taskDiv);
+          secDiv.appendChild(div);
         });
       }
 
@@ -472,8 +355,6 @@ function render() {
 
     app.appendChild(phaseDiv);
   });
-
-  save();
 }
 
 /* INIT */
