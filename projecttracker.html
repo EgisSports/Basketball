@@ -12,7 +12,6 @@ body {
   color: #e5e7eb;
 }
 
-/* TOP BAR */
 .topbar {
   display: flex;
   overflow-x: auto;
@@ -26,7 +25,7 @@ body {
   background: #374151;
   border-radius: 6px;
   padding: 6px;
-  min-width: 170px;
+  min-width: 180px;
   display: flex;
 }
 
@@ -43,14 +42,12 @@ body {
   font-size: 14px;
 }
 
-/* BUTTONS */
 .new-project-btn {
   padding: 8px 12px;
   background: #10b981;
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
-  white-space: nowrap;
 }
 
 .delete-project-btn {
@@ -59,10 +56,8 @@ body {
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
-  white-space: nowrap;
 }
 
-/* MAIN */
 .container {
   padding: 20px;
   height: calc(100vh - 50px);
@@ -88,10 +83,8 @@ body {
 }
 
 .section-title {
-  display: flex;
-  justify-content: space-between;
   font-weight: bold;
-  cursor: pointer;
+  margin-bottom: 5px;
 }
 
 .task {
@@ -112,7 +105,6 @@ body {
   text-transform: uppercase;
 }
 
-/* STATUS COLORS */
 .not-started { background: #2b3444; }
 .in-progress { background: #1e3a8a; }
 .blocked { background: #7f1d1d; }
@@ -149,27 +141,198 @@ function nextStatus(s) {
 }
 
 /* =========================
-   TEMPLATE (UNCHANGED)
+   FULL MUNICIPAL WBS (RESTORED COMPLETE)
 ========================= */
 
 const phasesTemplate = [
+
 {
   name: "0 - Project Kickoff",
   sections: [
     {
       name: "Initiation & Coordination",
       tasks: [
-        "Identify client PM",
-        "Internal kickoff",
-        "Define regulatory triggers",
-        "Confirm funding source",
-        "Prepare kickoff memo",
+        "Identify client PM and stakeholders",
+        "Internal kickoff meeting (civil/process/structural/electrical)",
+        "Define regulatory triggers (IDNR/IDEM/EPA/MS4)",
+        "Confirm funding source (SRF/ARPA/bonds/capital budget)",
+        "Review prior studies and master plans",
         "Establish communication matrix",
-        "Document risks"
+        "Prepare project initiation memo",
+        "Define scope boundaries and exclusions",
+        "Schedule kickoff meeting with client",
+        "Document initial project risks"
+      ]
+    }
+  ]
+},
+
+{
+  name: "1 - Planning & Investigation",
+  sections: [
+    {
+      name: "Data Collection",
+      tasks: [
+        "Collect GIS utility data",
+        "Obtain as-built drawings",
+        "Review O&M manuals and records",
+        "Compile maintenance history",
+        "Contact utility owners (gas/electric/telecom/fiber)",
+        "Request IDEM SSO/CSO records",
+        "Review CIP documents"
+      ]
+    },
+    {
+      name: "Field Investigations",
+      tasks: [
+        "CCTV sewer inspection",
+        "Manhole inspections and defect coding",
+        "Hydrant flow testing coordination",
+        "Valve exercising coordination",
+        "Pump station field inspection",
+        "Flow monitoring setup (I/I study)",
+        "Rainfall data correlation",
+        "Outfall inspections",
+        "Wet weather observations"
+      ]
+    },
+    {
+      name: "Hydraulic Modeling",
+      tasks: [
+        "Build SWMM/EPANET model",
+        "Calibrate system model",
+        "Baseline capacity analysis",
+        "Surcharge and flooding analysis",
+        "Infiltration/inflow source identification",
+        "Scenario development"
+      ]
+    }
+  ]
+},
+
+{
+  name: "2 - Preliminary Design (30%)",
+  sections: [
+    {
+      name: "Concept Development",
+      tasks: [
+        "Develop system alternatives",
+        "Evaluate gravity vs pump systems",
+        "Preliminary alignment selection",
+        "Utility conflict screening",
+        "Constructability review",
+        "Preliminary cost estimating",
+        "Prepare 30% design package"
+      ]
+    },
+    {
+      name: "Equipment & Vendor Coordination",
+      tasks: [
+        "Preliminary pump selection (duty point analysis)",
+        "Contact pump manufacturers for budget pricing",
+        "UV disinfection system preliminary sizing",
+        "Blower/aeration system evaluation",
+        "Packaged equipment vendor outreach",
+        "Preliminary equipment layout coordination"
+      ]
+    }
+  ]
+},
+
+{
+  name: "3 - Detailed Design (60–90%)",
+  sections: [
+    {
+      name: "Final Engineering Design",
+      tasks: [
+        "Finalize plan and profile drawings",
+        "Pipe material and class selection",
+        "Manhole structure design",
+        "Utility conflict resolution",
+        "Erosion and sediment control design",
+        "Pump station final design",
+        "Force main hydraulic/surge analysis",
+        "Equipment specification development",
+        "Coordinate vendor submittals",
+        "Review manufacturer drawings"
+      ]
+    }
+  ]
+},
+
+{
+  name: "4 - Bid Phase",
+  sections: [
+    {
+      name: "Contract Documents",
+      tasks: [
+        "Finalize construction plans and specs",
+        "Engineer’s Opinion of Cost",
+        "Prepare bid forms",
+        "Pre-bid meeting coordination",
+        "Issue addenda",
+        "Respond to bidder questions",
+        "Bid tabulation and recommendation"
+      ]
+    }
+  ]
+},
+
+{
+  name: "5 - Construction Administration",
+  sections: [
+    {
+      name: "Field Services",
+      tasks: [
+        "Pre-construction meeting",
+        "Submittal review and approval",
+        "RFI responses",
+        "Site visits and observation reports",
+        "Pay application review",
+        "Change order evaluation",
+        "Construction testing oversight",
+        "Utility coordination",
+        "Progress documentation"
+      ]
+    }
+  ]
+},
+
+{
+  name: "6 - Project Closeout",
+  sections: [
+    {
+      name: "Acceptance",
+      tasks: [
+        "Punch list walkthrough",
+        "Final inspection",
+        "Substantial completion certification",
+        "Final pay application approval",
+        "Operator training",
+        "O&M manual turnover",
+        "Warranty documentation"
+      ]
+    }
+  ]
+},
+
+{
+  name: "7 - Record Drawings",
+  sections: [
+    {
+      name: "As-Built Documentation",
+      tasks: [
+        "Contractor redline compilation",
+        "Field survey verification",
+        "Final as-built drawings",
+        "GIS database updates",
+        "Asset registry updates",
+        "Project archive submission"
       ]
     }
   ]
 }
+
 ];
 
 /* =========================
@@ -214,7 +377,7 @@ function createProject(name) {
   render();
 }
 
-/* init */
+/* INIT */
 if (!store.projects || Object.keys(store.projects).length === 0) {
   createProject("Phase IIB Sewer Interceptor");
   createProject("Greenbank Pump Station");
@@ -225,27 +388,26 @@ if (!store.activeProjectId) {
 }
 
 /* =========================
-   DELETE PROJECT (NEW)
+   DELETE PROJECT
 ========================= */
 
-function deleteCurrentProject() {
-  const project = store.projects[store.activeProjectId];
-  if (!project) return;
+function deleteProject() {
+  const p = store.projects[store.activeProjectId];
+  if (!p) return;
 
-  const ok = confirm(`Delete project "${project.name}"? This cannot be undone.`);
-  if (!ok) return;
+  if (!confirm(`Delete "${p.name}"? This cannot be undone.`)) return;
 
   delete store.projects[store.activeProjectId];
 
-  const remaining = Object.keys(store.projects);
-  store.activeProjectId = remaining.length ? remaining[0] : null;
+  const keys = Object.keys(store.projects);
+  store.activeProjectId = keys.length ? keys[0] : null;
 
   save();
   render();
 }
 
 /* =========================
-   TOP BAR
+   RENDER
 ========================= */
 
 function renderTabs() {
@@ -286,31 +448,25 @@ function renderTabs() {
   const delBtn = document.createElement("div");
   delBtn.className = "delete-project-btn";
   delBtn.innerText = "Delete Project";
-  delBtn.onclick = deleteCurrentProject;
+  delBtn.onclick = deleteProject;
 
   el.appendChild(newBtn);
   el.appendChild(delBtn);
 }
 
-/* =========================
-   RENDER
-========================= */
-
+/* MAIN RENDER */
 function render() {
   renderTabs();
 
   const project = store.projects[store.activeProjectId];
 
-  if (!project) {
-    document.getElementById("title").innerText = "No Project Selected";
-    document.getElementById("app").innerHTML = "";
-    return;
-  }
-
-  document.getElementById("title").innerText = project.name;
+  document.getElementById("title").innerText =
+    project ? project.name : "No Project Selected";
 
   const app = document.getElementById("app");
   app.innerHTML = "";
+
+  if (!project) return;
 
   project.phases.forEach(phase => {
 
@@ -338,7 +494,8 @@ function render() {
         div.className = "task " + task.status;
 
         div.onclick = () => {
-          task.status = nextStatus(task.status);
+          const order = STATUSES;
+          task.status = order[(order.indexOf(task.status) + 1) % order.length];
           save();
           render();
         };
@@ -365,7 +522,6 @@ function render() {
 
         div.appendChild(header);
         div.appendChild(notes);
-
         secDiv.appendChild(div);
       });
 
