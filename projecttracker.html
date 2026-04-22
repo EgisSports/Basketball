@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Municipal Project Tracker</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6f9;
+}
+
+/* TOP PROJECT BAR */
+.topbar {
+  display: flex;
+  overflow-x: auto;
+  background: #111827;
+  color: white;
+  padding: 10px;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.project-tab {
+  padding: 8px 14px;
+  background: #374151;
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.project-tab.active {
+  background: #2563eb;
+}
+
+/* MAIN LAYOUT */
+.container {
+  padding: 20px;
+  height: calc(100vh - 50px);
+  overflow-y: auto;
+}
+
+/* PHASE CARD */
+.phase {
+  background: white;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.phase-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* SECTION */
+.section {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 10px;
+  margin-top: 10px;
+}
+
+.section-title {
+  font-weight: bold;
+  cursor: pointer;
+  color: #111827;
+}
+
+/* TASK */
+.task {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 10px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.task select {
+  height: 30px;
+}
+
+.task-content {
+  flex: 1;
+}
+
+.task-name {
+  font-weight: bold;
+}
+
+textarea {
+  width: 100%;
+  margin-top: 5px;
+  height: 50px;
+}
+
+/* STATUS COLORS */
+.not-started { border-left: 4px solid #9ca3af; }
+.in-progress { border-left: 4px solid #3b82f6; }
+.blocked { border-left: 4px solid #ef4444; }
+.complete { border-left: 4px solid #10b981; }
+
+small {
+  color: #6b7280;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar" id="projectTabs"></div>
+<div class="container">
+  <h2 id="projectTitle"></h2>
+  <div id="app"></div>
+</div>
+
+<script>
+/* =========================
+   DATA MODEL
+========================= */
+
+const phasesTemplate = [
+  {
+    name: "0 - Project Rumblings",
+    sections: [
+      {
+        name: "Initiation",
+        tasks: [
+          "Initial Internal Discussion",
+          "Client Contact / Request Intake",
+          "Go / No-Go Decision",
+          "Proposal Authorization"
+        ]
+      }
+    ]
+  },
+  {
+    name: "1 - Planning & Investigation",
+    sections: [
+      {
+        name: "Investigation",
+        tasks: [
+          "Kickoff & Team Setup",
+          "Site Visit & Condition Assessment",
+          "CCTV Inspection (Sanitary)",
+          "Hydrant Flow Testing",
+          "Pump Station Evaluation",
+          "Flow Monitoring & Rainfall Analysis",
+          "Water Quality Sampling",
+          "Gather Existing Data (GIS, As-builts, O&M)"
+        ]
+      },
+      {
+        name: "Analysis & Scoping",
+        tasks: [
+          "Define Problem & Objectives",
+          "Identify Constraints",
+          "Evaluate Alternatives",
+          "Preliminary Cost & Schedule"
+        ]
+      },
+      {
+        name: "Decision",
+        tasks: [
+          "Feasibility Determination",
+          "Select Preferred Alternative",
+          "Funding Confirmation"
+        ]
+      }
+    ]
+  },
+  {
+    name: "2 - Preliminary Design (30%)",
+    sections: [
+      {
+        name: "Design Development",
+        tasks: [
+          "Topographic Survey",
+          "Utility Coordination",
+          "Geotechnical Investigation",
+          "Preliminary Layout & Alignment",
+          "Hydraulic Modeling (EPANET / SWMM)",
+          "Preliminary Cost Estimate",
+          "30% Design Package"
+        ]
+      }
+    ]
+  },
+  {
+    name: "3 - Detailed Design (60–90%)",
+    sections: [
+      {
+        name: "Engineering Design",
+        tasks: [
+          "Final Layout & Profiles",
+          "Pipe Materials Selection",
+          "Pump Station Design",
+          "Storm/Sanitary Separation Design",
+          "Treatment / Flow Control Elements",
+          "Draft Specifications",
+          "60–90% Plans"
+        ]
+      },
+      {
+        name: "Permitting",
+        tasks: [
+          "Environmental Permits",
+          "Agency Coordination",
+          "Permit Applications",
+          "Regulatory Review Response"
+        ]
+      }
+    ]
+  },
+  {
+    name: "4 - Final Design / Bid Package",
+    sections: [
+      {
+        name: "Finalization",
+        tasks: [
+          "QA/QC Review",
+          "Final Plans & Specs",
+          "Engineer’s Opinion of Cost",
+          "Bid Package Assembly",
+          "Addenda Preparation",
+          "Bid Advertisement"
+        ]
+      }
+    ]
+  },
+  {
+    name: "5 - Construction Administration",
+    sections: [
+      {
+        name: "Field Work",
+        tasks: [
+          "Pre-Construction Meeting",
+          "Submittal Review",
+          "RFI Responses",
+          "Site Visits",
+          "Pay Applications Review",
+          "Change Orders",
+          "Construction Testing Oversight"
+        ]
+      }
+    ]
+  },
+  {
+    name: "6 - Project Closeout",
+    sections: [
+      {
+        name: "Closeout",
+        tasks: [
+          "Punch List Walkthrough",
+          "System Performance Verification",
+          "Final Pay Application",
+          "Training & O&M Manuals",
+          "Substantial Completion"
+        ]
+      }
+    ]
+  },
+  {
+    name: "7 - As-Builts / Record Drawings",
+    sections: [
+      {
+        name: "Record Documentation",
+        tasks: [
+          "Contractor Redlines",
+          "Survey Verification",
+          "GIS Updates",
+          "Final As-Built Drawings",
+          "Project Archive Completion"
+        ]
+      }
+    ]
+  }
+];
+
+/* =========================
+   STATE
+========================= */
+
+const projectNames = [
+  "Project 1","Project 2","Project 3","Project 4",
+  "Project 5","Project 6","Project 7","Project 8"
+];
+
+let projects = JSON.parse(localStorage.getItem("projects")) || {};
+let currentProject = projectNames[0];
+
+/* init */
+projectNames.forEach(p => {
+  if (!projects[p]) {
+    projects[p] = structuredClone(phasesTemplate).map(phase => ({
+      ...phase,
+      sections: phase.sections.map(sec => ({
+        ...sec,
+        tasks: sec.tasks.map(t => ({
+          name: t,
+          status: "not-started",
+          notes: ""
+        }))
+      }))
+    }));
+  }
+});
+
+function save() {
+  localStorage.setItem("projects", JSON.stringify(projects));
+}
+
+/* =========================
+   UI RENDER
+========================= */
+
+function renderTabs() {
+  const tabs = document.getElementById("projectTabs");
+  tabs.innerHTML = "";
+
+  projectNames.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "project-tab" + (p === currentProject ? " active" : "");
+    div.innerText = p;
+    div.onclick = () => {
+      currentProject = p;
+      render();
+    };
+    tabs.appendChild(div);
+  });
+}
+
+function statusClass(status) {
+  return {
+    "not-started": "not-started",
+    "in-progress": "in-progress",
+    "blocked": "blocked",
+    "complete": "complete"
+  }[status];
+}
+
+function render() {
+  renderTabs();
+
+  document.getElementById("projectTitle").innerText = currentProject;
+
+  const app = document.getElementById("app");
+  app.innerHTML = "";
+
+  const project = projects[currentProject];
+
+  project.forEach((phase, pIndex) => {
+    const phaseDiv = document.createElement("div");
+    phaseDiv.className = "phase";
+
+    const title = document.createElement("div");
+    title.className = "phase-title";
+    title.innerText = phase.name;
+    phaseDiv.appendChild(title);
+
+    phase.sections.forEach((section, sIndex) => {
+      const secDiv = document.createElement("div");
+      secDiv.className = "section";
+
+      const secTitle = document.createElement("div");
+      secTitle.className = "section-title";
+      secTitle.innerText = section.name;
+      secDiv.appendChild(secTitle);
+
+      section.tasks.forEach((task, tIndex) => {
+
+        const taskDiv = document.createElement("div");
+        taskDiv.className = "task " + statusClass(task.status);
+
+        const select = document.createElement("select");
+        ["not-started","in-progress","blocked","complete"].forEach(s => {
+          const opt = document.createElement("option");
+          opt.value = s;
+          opt.text = s;
+          if (task.status === s) opt.selected = true;
+          select.appendChild(opt);
+        });
+
+        select.onchange = (e) => {
+          task.status = e.target.value;
+          save();
+          render();
+        };
+
+        const content = document.createElement("div");
+        content.className = "task-content";
+
+        const name = document.createElement("div");
+        name.className = "task-name";
+        name.innerText = task.name;
+
+        const notes = document.createElement("textarea");
+        notes.value = task.notes;
+        notes.placeholder = "Notes / updates...";
+        notes.oninput = (e) => {
+          task.notes = e.target.value;
+          save();
+        };
+
+        content.appendChild(name);
+        content.appendChild(notes);
+
+        taskDiv.appendChild(select);
+        taskDiv.appendChild(content);
+
+        secDiv.appendChild(taskDiv);
+      });
+
+      phaseDiv.appendChild(secDiv);
+    });
+
+    app.appendChild(phaseDiv);
+  });
+
+  save();
+}
+
+/* INIT */
+render();
+</script>
+
+</body>
+</html>
